@@ -376,6 +376,7 @@ function App() {
         />
       </div>
       <div style={{ display: 'none' }} data-theme={theme} />
+      <div className='large-screen-message'>Please Open Laptop or Desktop</div>
       <Footer />
     </div>
   );
