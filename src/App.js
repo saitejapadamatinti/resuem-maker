@@ -159,17 +159,18 @@ function App() {
 
   const normalizeImportedResume = (input) => {
     if (!input || typeof input !== 'object') return null;
+    const source = input.resumeData && typeof input.resumeData === 'object' ? input.resumeData : input;
     const directShape = {
-      contact: input.contact || {
-        fullName: input.fullName || input.name || '',
-        phone: input.phone || (input.basics && input.basics.phone) || '',
-        email: input.email || (input.basics && input.basics.email) || '',
-        location: input.location || (input.basics && input.basics.location && (input.basics.location.city || input.basics.location.region)) || '',
-        linkedIn: input.linkedIn || (input.basics && input.basics.profiles && (input.basics.profiles.find(p => /linkedin/i.test(p.network)) || {}).url) || ''
+      contact: source.contact || {
+        fullName: source.fullName || source.name || '',
+        phone: source.phone || (source.basics && source.basics.phone) || '',
+        email: source.email || (source.basics && source.basics.email) || '',
+        location: source.location || (source.basics && source.basics.location && (source.basics.location.city || source.basics.location.region)) || '',
+        linkedIn: source.linkedIn || (source.basics && source.basics.profiles && (source.basics.profiles.find(p => /linkedin/i.test(p.network)) || {}).url) || ''
       },
-      websites: input.websites || (input.basics && input.basics.profiles ? input.basics.profiles.map((p, idx) => ({ id: idx + 1, label: p.network, url: p.url })) : []),
-      summary: input.summary || (input.basics && input.basics.summary) || '',
-      experience: Array.isArray(input.experience) ? input.experience : (Array.isArray(input.work) ? input.work.map((w, i) => ({
+      websites: source.websites || (source.basics && source.basics.profiles ? source.basics.profiles.map((p, idx) => ({ id: idx + 1, label: p.network, url: p.url })) : []),
+      summary: source.summary || (source.basics && source.basics.summary) || '',
+      experience: Array.isArray(source.experience) ? source.experience : (Array.isArray(source.work) ? source.work.map((w, i) => ({
         id: i + 1,
         title: w.position || '',
         company: w.name || '',
@@ -178,15 +179,15 @@ function App() {
         endDate: w.endDate || (w.isCurrent ? 'Present' : ''),
         achievements: Array.isArray(w.highlights) ? w.highlights : []
       })) : []),
-      education: Array.isArray(input.education) ? input.education : (Array.isArray(input.educationHistory) ? input.educationHistory : (Array.isArray(input.education) ? input.education : [])),
-      projects: Array.isArray(input.projects) ? input.projects : [],
+      education: Array.isArray(source.education) ? source.education : (Array.isArray(source.educationHistory) ? source.educationHistory : (Array.isArray(source.education) ? source.education : [])),
+      projects: Array.isArray(source.projects) ? source.projects : [],
       skills: (() => {
-        if (input.skills && (Array.isArray(input.skills.technical) || Array.isArray(input.skills.soft) || Array.isArray(input.skills.other))) {
-          return input.skills;
+        if (source.skills && (Array.isArray(source.skills.technical) || Array.isArray(source.skills.soft) || Array.isArray(source.skills.other))) {
+          return source.skills;
         }
-        if (Array.isArray(input.skills)) {
+        if (Array.isArray(source.skills)) {
           return {
-            technical: input.skills.map(s => s.name || s),
+            technical: source.skills.map(s => s.name || s),
             soft: [],
             other: []
           };
@@ -210,6 +211,10 @@ function App() {
     if (Array.isArray(json.steps)) {
       const valid = json.steps.filter(k => ['contact','websites','summary','experience','education','projects','skills','preview'].includes(k));
       if (valid.length) setSteps(valid);
+    }
+    if (typeof json.currentStep === 'number') {
+      const idx = Math.max(0, Math.min(json.currentStep, steps.length - 1));
+      setCurrentStep(idx);
     }
   };
 
