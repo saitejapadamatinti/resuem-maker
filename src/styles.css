@@ -258,6 +258,12 @@ p {
   border-radius: var(--radius-md);
 }
 
+.btn--sm {
+  padding: var(--space-6) var(--space-12);
+  font-size: var(--font-size-sm);
+  border-radius: var(--radius-sm);
+}
+
 .btn--full-width {
   width: 100%;
 }
@@ -446,6 +452,7 @@ p {
   cursor: pointer;
   transition: all var(--duration-fast) var(--ease-standard);
   border: 1px solid transparent;
+  gap: var(--space-12);
 }
 
 .nav-step:hover {
@@ -506,6 +513,40 @@ p {
 .step-title {
   font-weight: var(--font-weight-medium);
   font-size: var(--font-size-base);
+  flex: 1;
+}
+
+.drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  cursor: grab;
+  opacity: 0.6;
+  transition: opacity var(--duration-fast) var(--ease-standard);
+  user-select: none;
+  margin-left: auto;
+}
+
+.drag-handle:hover {
+  opacity: 1;
+  color: var(--color-text);
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.nav-step:hover .drag-handle {
+  opacity: 0.8;
+}
+
+.nav-step.active .drag-handle {
+  color: var(--color-btn-primary-text);
+  opacity: 0.8;
 }
 
 .sidebar-actions {
@@ -714,8 +755,9 @@ p {
   border-radius: var(--radius-lg);
   padding: var(--space-32);
   margin-bottom: var(--space-24);
-  font-family: var(--font-family-base);
-  line-height: 1.4;
+  font-family: var(--resume-font-family, var(--font-family-base));
+  font-size: var(--resume-font-size, var(--font-size-base));
+  line-height: var(--resume-line-height, 1.4);
   box-shadow: var(--shadow-lg);
   max-width: 8.5in;
   margin-left: auto;
@@ -750,20 +792,28 @@ p {
 }
 
 .resume-section h2 {
-  font-size: 18px;
+  font-size: var(--resume-heading-size, 18px);
   font-weight: bold;
   color: var(--color-text);
   margin-bottom: var(--space-12);
   padding-bottom: var(--space-4);
-  border-bottom: 1px solid var(--color-border);
-  text-transform: uppercase;
+  text-transform: var(--resume-heading-transform, uppercase);
   letter-spacing: 0.5px;
+  border-bottom-width: 1px;
+  border-bottom-style: var(--resume-section-divider-style, solid);
+  border-bottom-color: var(--resume-accent-color, var(--color-border));
 }
 
 .experience-entry,
 .education-entry {
   margin-bottom: var(--space-16);
 }
+
+/* ATS-friendly adjustments */
+.ats-friendly .resume-header { border-bottom-color: #000; }
+.ats-friendly .resume-section h2 { border-bottom-color: #000; letter-spacing: 0; text-transform: none; }
+.ats-friendly .entry-achievements li::before { color: #000; }
+.ats-friendly a { color: inherit; text-decoration: none; }
 
 .entry-header {
   display: flex;
@@ -790,8 +840,8 @@ p {
 }
 
 .entry-achievements {
-  list-style: none;
-  padding: 0;
+  list-style: none; /* Prevent native bullets to avoid double dots */
+  padding-left: var(--space-16);
   margin: var(--space-8) 0 0 0;
 }
 
@@ -803,10 +853,10 @@ p {
 }
 
 .entry-achievements li::before {
-  content: '•';
+  content: var(--resume-bullet-symbol, '•'); /* Set to '' to hide bullets */
   position: absolute;
   left: 0;
-  color: var(--color-primary);
+  color: var(--resume-accent-color, var(--color-primary));
   font-weight: bold;
 }
 
@@ -961,8 +1011,162 @@ p {
 .theme-twocol .resume-left .resume-section h2 { border-left: 3px solid var(--color-primary); padding-left: 8px; text-transform: none; }
 .theme-twocol .resume-right .resume-section h2 { border-bottom: 1px solid var(--color-border); text-transform: none; }
 
+/* Single Column Layout for Dynamic Ordering */
+.resume-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-24);
+}
+
+.resume-content .resume-section {
+  margin-bottom: var(--space-16);
+}
+
+.resume-content .resume-section h2 {
+  border-bottom: 2px solid var(--color-border);
+  padding-bottom: 6px;
+  margin-bottom: var(--space-16);
+  text-transform: none;
+}
+
+/* Layout Options Controls */
+.layout-options {
+  background: var(--color-surface);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-24);
+  margin-bottom: var(--space-24);
+}
+
+.layout-options h4 {
+  margin: 0 0 var(--space-16) 0;
+  color: var(--color-text);
+  font-size: var(--font-size-lg);
+}
+
+.gap-control {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+}
+
+.gap-control label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+  margin-bottom: var(--space-8);
+}
+
+.gap-value {
+  background: var(--color-primary);
+  color: var(--color-btn-primary-text);
+  padding: var(--space-4) var(--space-8);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+.gap-slider {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--color-border);
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.gap-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  cursor: pointer;
+  border: 2px solid var(--color-background);
+  box-shadow: var(--shadow-sm);
+}
+
+.gap-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  cursor: pointer;
+  border: 2px solid var(--color-background);
+  box-shadow: var(--shadow-sm);
+}
+
+.gap-presets {
+  display: flex;
+  gap: var(--space-8);
+  flex-wrap: wrap;
+}
+
+.gap-presets .btn {
+  flex: 1;
+  min-width: 80px;
+  text-align: center;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-24);
+  z-index: 1000;
+}
+
+.modal {
+  width: 100%;
+  max-width: 640px;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-card-border);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-16) var(--space-20);
+  border-bottom: 1px solid var(--color-card-border-inner);
+}
+
+.modal-header h3 { margin: 0; }
+
+.modal-close {
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-size: var(--font-size-xl);
+}
+
+.modal-body {
+  padding: var(--space-20);
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-12);
+  padding: var(--space-16) var(--space-20);
+  border-top: 1px solid var(--color-card-border-inner);
+}
+
 @media print {
   .theme-twocol .resume-body { display: block; }
+  .resume-content { gap: var(--space-16); }
 }
 
 /* Usage Guide Styles */
@@ -1493,4 +1697,248 @@ p {
 .success {
   border-color: var(--color-success) !important;
   background-color: rgba(var(--color-success-rgb), 0.05);
+}
+
+/* Website Links in Resume Preview */
+.website-links {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.website-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  padding: var(--space-8);
+  background: var(--color-surface);
+  border: 1px solid var(--color-card-border-inner);
+  border-radius: var(--radius-base);
+  word-break: break-all;
+  overflow-wrap: break-word;
+}
+
+.website-label {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+  flex-shrink: 0;
+  min-width: fit-content;
+}
+
+.website-url {
+  color: var(--color-primary);
+  text-decoration: none;
+  word-break: break-all;
+  overflow-wrap: break-word;
+  line-height: 1.4;
+}
+
+.website-url:hover {
+  text-decoration: underline;
+  color: var(--color-primary-hover);
+}
+
+.website-url:focus {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Ensure website URLs don't get truncated in print */
+@media print {
+  .website-url {
+    word-break: break-all;
+    overflow-wrap: break-word;
+  }
+}
+
+/* Contact Links in Resume Header */
+.contact-link {
+  color: var(--color-primary);
+  text-decoration: none;
+  word-break: break-all;
+  overflow-wrap: break-word;
+}
+
+.contact-link:hover {
+  text-decoration: underline;
+  color: var(--color-primary-hover);
+}
+
+.contact-link:focus {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Ensure contact links don't get truncated in print */
+@media print {
+  .contact-link {
+    word-break: break-all;
+    overflow-wrap: break-word;
+  }
+}
+
+/* Project Links in Resume Preview */
+.project-link {
+  color: var(--color-primary);
+  text-decoration: none;
+  word-break: break-all;
+  overflow-wrap: break-word;
+  font-size: var(--font-size-sm);
+  max-width: 200px;
+  display: inline-block;
+}
+
+.project-link:hover {
+  text-decoration: underline;
+  color: var(--color-primary-hover);
+}
+
+.project-link:focus {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Ensure project links don't get truncated in print */
+@media print {
+  .project-link {
+    word-break: break-all;
+    overflow-wrap: break-word;
+    max-width: none;
+  }
+}
+
+/* Responsive Design for Website Links */
+@media (max-width: 768px) {
+  .website-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-4);
+  }
+  
+  .website-label {
+    font-size: var(--font-size-sm);
+  }
+  
+  .website-url {
+    font-size: var(--font-size-sm);
+    line-height: 1.3;
+  }
+  
+  .project-link {
+    max-width: 150px;
+    font-size: var(--font-size-xs);
+  }
+}
+
+@media (max-width: 480px) {
+  .website-item {
+    padding: var(--space-6);
+  }
+  
+  .website-url {
+    font-size: var(--font-size-xs);
+  }
+  
+  .project-link {
+    max-width: 120px;
+  }
+}
+
+/* PDF Options UI */
+.pdf-options {
+  margin-bottom: var(--space-24);
+  text-align: center;
+}
+
+.pdf-options h4 {
+  margin-bottom: var(--space-16);
+  color: var(--color-text);
+  font-size: var(--font-size-lg);
+}
+
+.pdf-quality-buttons {
+  display: flex;
+  gap: var(--space-12);
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: var(--space-16);
+}
+
+.pdf-quality-buttons .btn {
+  position: relative;
+  min-width: 140px;
+}
+
+.file-size {
+  display: block;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-normal);
+  opacity: 0.8;
+  margin-top: var(--space-2);
+}
+
+.clarity-level {
+  display: block;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-primary);
+  margin-top: var(--space-2);
+}
+
+.file-size-note {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+  padding: var(--space-12);
+  background: var(--color-bg-1);
+  border-radius: var(--radius-base);
+  border: 1px solid var(--color-card-border-inner);
+}
+
+.file-size-limit {
+  font-size: var(--font-size-sm);
+  color: var(--color-info);
+  margin: 0;
+  padding: var(--space-8);
+  background: var(--color-bg-8);
+  border-radius: var(--radius-base);
+  border: 1px solid rgba(var(--color-info-rgb), 0.2);
+}
+
+.content-complexity {
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  margin: 0;
+  padding: var(--space-8);
+  background: var(--color-bg-3);
+  border-radius: var(--radius-base);
+  border: 1px solid rgba(var(--color-success-rgb), 0.2);
+}
+
+.quality-info {
+  font-size: var(--font-size-sm);
+  color: var(--color-primary);
+  margin: 0;
+  padding: var(--space-8);
+  background: var(--color-bg-5);
+  border-radius: var(--radius-base);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+}
+
+/* Responsive design for PDF options */
+@media (max-width: 768px) {
+  .pdf-quality-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .pdf-quality-buttons .btn {
+    width: 100%;
+    max-width: 280px;
+  }
+  
+  .file-size-note {
+    font-size: var(--font-size-xs);
+    padding: var(--space-8);
+  }
 }

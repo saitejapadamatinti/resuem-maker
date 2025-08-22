@@ -92,10 +92,13 @@ function App() {
   };
 
   const reorderSteps = (newSteps) => {
+    console.log('reorderSteps called with:', newSteps);
+    console.log('Current steps before reorder:', steps);
     const currentKey = steps[currentStep];
     setSteps(newSteps);
     const newIndex = newSteps.indexOf(currentKey);
     setCurrentStep(newIndex >= 0 ? newIndex : 0);
+    console.log('Steps reordered successfully');
   };
 
   const updateResumeData = (section, data) => {
