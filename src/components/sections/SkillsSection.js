@@ -5,11 +5,26 @@ function SkillsSection({ data, onUpdate }) {
   const [skillInput, setSkillInput] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
 
-  const allSkills = [
+  const extraSkills = [
+    "JavaScript","TypeScript","Python","Java","C","C++","C#","Go","Rust","Ruby","PHP","Swift","Kotlin","R","MATLAB",
+    "HTML","CSS","Sass","LESS","React.js","Next.js","Angular","Vue.js","Node.js","Express.js","Django","Flask","Ruby on Rails",
+    "MySQL","PostgreSQL","MongoDB","SQLite","Redis","Oracle DB","Firebase","DynamoDB",
+    "AWS","Azure","Google Cloud","Docker","Kubernetes","CI/CD","Terraform","Ansible","Jenkins","Git",
+    "React Native","Flutter","Swift","Kotlin","Android Studio","Xcode",
+    "Visual Studio Code","IntelliJ IDEA","Eclipse","Postman","Figma","Adobe XD","GitHub","GitLab","Jira","Confluence","Slack","Trello",
+    "SQL","NoSQL","Pandas","NumPy","TensorFlow","PyTorch","Power BI","Tableau","Excel","Data Visualization","Machine Learning","Artificial Intelligence","Big Data",
+    "TCP/IP","HTTP/HTTPS","DNS","Firewall","VPN","Cybersecurity","Ethical Hacking","Penetration Testing","Network Administration",
+    "AWS EC2","S3","Lambda","Azure Functions","Google Cloud Functions","Serverless Architecture",
+    "Blockchain","IoT","AR/VR","Quantum Computing","Robotics","API Development","REST API","GraphQL",
+    "Problem Solving","Critical Thinking","Teamwork","Communication Skills","Time Management","Adaptability","Leadership","Creativity","Attention to Detail","Project Management","Analytical Skills","Customer Service","Collaboration","Decision Making","Conflict Resolution"
+  ];
+
+  const allSkills = Array.from(new Set([
     ...applicationData.commonKeywords.skills,
     ...applicationData.commonKeywords.technical,
-    ...applicationData.commonKeywords.soft
-  ];
+    ...applicationData.commonKeywords.soft,
+    ...extraSkills
+  ]));
 
   const handleSkillInput = (e) => {
     const value = e.target.value;

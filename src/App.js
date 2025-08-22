@@ -18,7 +18,11 @@ const STORAGE_STEP_INDEX_KEY = 'ats-resume-builder:currentStep:v1';
 
 function App() {
   const [currentStep, setCurrentStep] = useState(0);
-  const [steps, setSteps] = useState(['contact', 'websites', 'summary', 'experience', 'education', 'projects', 'skills', 'preview']);
+  const [steps, setSteps] = useState(['usage-guide', 'contact', 'websites', 'summary', 'experience', 'education', 'projects', 'skills', 'preview']);
+  
+  // Debug logging
+  console.log('Current steps:', steps);
+  console.log('Current step index:', currentStep);
   const [resumeData, setResumeData] = useState({
     contact: {},
     websites: [],
@@ -42,7 +46,16 @@ function App() {
       const rawSteps = localStorage.getItem(STORAGE_STEPS_KEY);
       if (rawSteps) {
         const parsedSteps = JSON.parse(rawSteps);
-        if (Array.isArray(parsedSteps) && parsedSteps.length) setSteps(parsedSteps);
+        if (Array.isArray(parsedSteps) && parsedSteps.length) {
+          // Ensure usage-guide is always the first step
+          const updatedSteps = ['usage-guide'];
+          parsedSteps.forEach(step => {
+            if (step !== 'usage-guide') {
+              updatedSteps.push(step);
+            }
+          });
+          setSteps(updatedSteps);
+        }
       }
       const rawIndex = localStorage.getItem(STORAGE_STEP_INDEX_KEY);
       if (rawIndex !== null) {
@@ -129,7 +142,7 @@ function App() {
       localStorage.removeItem(STORAGE_STEP_INDEX_KEY);
     } catch {}
     setResumeData({ contact: {}, websites: [], summary: '', experience: [], education: [], projects: [], skills: { technical: [], soft: [], other: [] } });
-    setSteps(['contact', 'websites', 'summary', 'experience', 'education', 'projects', 'skills', 'preview']);
+    setSteps(['usage-guide', 'contact', 'websites', 'summary', 'experience', 'education', 'projects', 'skills', 'preview']);
     setCurrentStep(0);
   };
 
@@ -209,8 +222,17 @@ function App() {
     setResumeData(normalized);
     setCurrentStep(0);
     if (Array.isArray(json.steps)) {
-      const valid = json.steps.filter(k => ['contact','websites','summary','experience','education','projects','skills','preview'].includes(k));
-      if (valid.length) setSteps(valid);
+      const valid = json.steps.filter(k => ['usage-guide','contact','websites','summary','experience','education','projects','skills','preview'].includes(k));
+      if (valid.length) {
+        // Ensure usage-guide is always the first step
+        const updatedSteps = ['usage-guide'];
+        valid.forEach(step => {
+          if (step !== 'usage-guide') {
+            updatedSteps.push(step);
+          }
+        });
+        setSteps(updatedSteps);
+      }
     }
     if (typeof json.currentStep === 'number') {
       const idx = Math.max(0, Math.min(json.currentStep, steps.length - 1));

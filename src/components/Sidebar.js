@@ -61,6 +61,7 @@ function Sidebar({ currentStep, steps, progress, onStepClick, onReorderSteps, on
       </div>
       
       <ul className="nav-steps">
+        {console.log('Steps in Sidebar:', steps)}
         {steps.map((step, index) => (
           <li 
             key={step + index}
@@ -71,8 +72,11 @@ function Sidebar({ currentStep, steps, progress, onStepClick, onReorderSteps, on
             onDragOver={onDragOver(index)}
             onDrop={onDrop(index)}
           >
-            <span className="step-number">{index + 1}</span>
+            <span className={`step-number ${step === 'usage-guide' ? 'step-number--guide' : ''}`}>
+              {step === 'usage-guide' ? '📖' : index + 1}
+            </span>
             <span className="step-title">
+              {step === 'usage-guide' && 'Usage Guide'}
               {step === 'contact' && 'Contact Info'}
               {step === 'websites' && 'Websites & Profiles'}
               {step === 'summary' && 'Summary'}

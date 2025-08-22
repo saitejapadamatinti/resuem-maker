@@ -1,4 +1,5 @@
 import React from 'react';
+import UsageGuide from './UsageGuide';
 import ContactSection from './sections/ContactSection';
 import WebsitesSection from './sections/WebsitesSection';
 import SummarySection from './sections/SummarySection';
@@ -14,6 +15,8 @@ function MainContent({ steps, currentStep, resumeData, onUpdateData, onStepChang
   const renderSection = () => {
     const step = steps[currentStep];
     switch (step) {
+      case 'usage-guide':
+        return <UsageGuide />;
       case 'contact':
         return (
           <ContactSection 
