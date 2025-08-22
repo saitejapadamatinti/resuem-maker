@@ -94,31 +94,7 @@ function Sidebar({ currentStep, steps, progress, onStepClick, onReorderSteps, on
         >
           Load Sample Data
         </button>
-        <div style={{ marginTop: 8 }}>
-          <label className="form-label">Resume Theme</label>
-          <select className="form-control" value={typeof theme !== 'undefined' ? theme : 'classic'} onChange={(e) => onChangeTheme && onChangeTheme(e.target.value)}>
-            <option value="classic">Classic</option>
-            <option value="modern">Modern</option>
-            <option value="elegant">Elegant</option>
-            <option value="compact">Compact</option>
-            <option value="professional">Professional</option>
-            <option value="twocol">Two Column</option>
-          </select>
-        </div>
-        <button 
-          className="btn btn--outline btn--full-width" 
-          onClick={handleImportClick}
-          style={{ marginTop: 8 }}
-        >
-          Import JSON/PDF Resume
-        </button>
-        <input 
-          ref={fileInputRef}
-          type="file" 
-          accept="application/json,application/pdf,.json,.pdf"
-          onChange={handleFileChange}
-          style={{ display: 'none' }}
-        />
+        
         <button 
           className="btn btn--secondary btn--full-width" 
           onClick={onSaveNow}

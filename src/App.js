@@ -3,6 +3,7 @@ import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import MainContent from './components/MainContent';
 import ATSPanel from './components/ATSPanel';
+import Footer from './components/Footer';
 import { applicationData } from './data/applicationData';
 import './App.css';
 import * as pdfjsLib from 'pdfjs-dist';
@@ -130,6 +131,30 @@ function App() {
     setResumeData({ contact: {}, websites: [], summary: '', experience: [], education: [], projects: [], skills: { technical: [], soft: [], other: [] } });
     setSteps(['contact', 'websites', 'summary', 'experience', 'education', 'projects', 'skills', 'preview']);
     setCurrentStep(0);
+  };
+
+  const exportJson = () => {
+    try {
+      const payload = {
+        resumeData,
+        steps,
+        currentStep,
+        exportedAt: new Date().toISOString()
+      };
+      const json = JSON.stringify(payload, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'resume-data.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error('Export failed', e);
+      alert('Could not export JSON.');
+    }
   };
 
   const normalizeImportedResume = (input) => {
@@ -309,7 +334,12 @@ function App() {
 
   return (
     <div className="app">
-      <Header />
+      <Header 
+        theme={theme}
+        onChangeTheme={setTheme}
+        onImportResume={importResume}
+        onImportPdf={importPdf}
+      />
       <div className="app-layout">
         <Sidebar 
           currentStep={currentStep}
@@ -321,6 +351,7 @@ function App() {
           onImportResume={importResume}
           onImportPdf={importPdf}
           onSaveNow={saveNow}
+          onExportJson={exportJson}
           onClearAll={clearAll}
           onAddCustom={addCustomStep}
           theme={theme}
@@ -332,6 +363,7 @@ function App() {
           resumeData={resumeData}
           onUpdateData={updateResumeData}
           onStepChange={goToStep}
+          onExportJson={exportJson}
         />
         <ATSPanel 
           resumeData={resumeData}
@@ -339,6 +371,7 @@ function App() {
         />
       </div>
       <div style={{ display: 'none' }} data-theme={theme} />
+      <Footer />
     </div>
   );
 }

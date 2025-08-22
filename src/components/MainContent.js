@@ -10,7 +10,7 @@ import SkillsSection from './sections/SkillsSection';
 import PreviewSection from './sections/PreviewSection';
 import SectionNavigation from './SectionNavigation';
 
-function MainContent({ steps, currentStep, resumeData, onUpdateData, onStepChange }) {
+function MainContent({ steps, currentStep, resumeData, onUpdateData, onStepChange, onExportJson }) {
   const renderSection = () => {
     const step = steps[currentStep];
     switch (step) {
@@ -75,6 +75,7 @@ function MainContent({ steps, currentStep, resumeData, onUpdateData, onStepChang
           <PreviewSection 
             steps={steps}
             resumeData={resumeData}
+            onExportJson={onExportJson}
           />
         );
       default:

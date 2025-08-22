@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
-function PreviewSection({ steps = [], resumeData }) {
+function PreviewSection({ steps = [], resumeData, onExportJson }) {
   const [pageGuides, setPageGuides] = useState([]);
 
   // A4 in points used by jsPDF
@@ -334,6 +334,9 @@ function PreviewSection({ steps = [], resumeData }) {
       <div className="preview-actions">
         <button className="btn btn--primary btn--lg" onClick={downloadPDF}>
           Download as PDF
+        </button>
+        <button className="btn btn--outline btn--lg" onClick={onExportJson}>
+          Export JSON
         </button>
         <button className="btn btn--outline btn--lg" onClick={printResume}>
           Print Resume
