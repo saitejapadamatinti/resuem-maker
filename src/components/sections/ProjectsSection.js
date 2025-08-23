@@ -1,34 +1,88 @@
 import React, { useState } from 'react';
 import RichTextEditor from '../controls/RichTextEditor';
 
-function ProjectsSection({ data, onUpdate }) {
-  const [projectCounter, setProjectCounter] = useState(1);
+function ProjectsSection({ data, onUpdate, sectionNames, onUpdateSectionNames }) {
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editingTitle, setEditingTitle] = useState(sectionNames?.projects || 'Projects');
 
   const addProject = () => {
     const newProject = {
-      id: projectCounter,
+      id: Date.now(),
       name: '',
       role: '',
       link: '',
       description: ''
     };
-    onUpdate([...(data || []), newProject]);
-    setProjectCounter(prev => prev + 1);
+    onUpdate([...data, newProject]);
   };
 
   const updateProject = (id, field, value) => {
-    const updated = (data || []).map(p => p.id === id ? { ...p, [field]: value } : p);
-    onUpdate(updated);
+    onUpdate(data.map(project => 
+      project.id === id ? { ...project, [field]: value } : project
+    ));
   };
 
   const removeProject = (id) => {
-    onUpdate((data || []).filter(p => p.id !== id));
+    onUpdate(data.filter(project => project.id !== id));
+  };
+
+  const handleTitleSave = () => {
+    if (onUpdateSectionNames && editingTitle.trim()) {
+      onUpdateSectionNames('projects', editingTitle.trim());
+    }
+    setIsEditingTitle(false);
+  };
+
+  const handleTitleCancel = () => {
+    setEditingTitle(sectionNames?.projects || 'Projects');
+    setIsEditingTitle(false);
   };
 
   return (
     <section className="section active">
-      <h2>Projects</h2>
-      <p className="section-description">Showcase notable projects relevant to your target role</p>
+      <div className="section-header-with-edit">
+        {isEditingTitle ? (
+          <div className="title-edit-container">
+            <input
+              type="text"
+              className="title-edit-input"
+              value={editingTitle}
+              onChange={(e) => setEditingTitle(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleTitleSave();
+                if (e.key === 'Escape') handleTitleCancel();
+              }}
+              autoFocus
+            />
+            <div className="title-edit-actions">
+              <button 
+                className="btn btn--sm btn--primary" 
+                onClick={handleTitleSave}
+              >
+                ✓
+              </button>
+              <button 
+                className="btn btn--sm btn--outline" 
+                onClick={handleTitleCancel}
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="section-title-display">
+            <h2>{sectionNames?.projects || 'Projects'}</h2>
+            <button 
+              className="btn btn--sm btn--outline title-edit-btn"
+              onClick={() => setIsEditingTitle(true)}
+              title="Edit section title"
+            >
+              ✏️
+            </button>
+          </div>
+        )}
+      </div>
+      <p className="section-description">Showcase your key projects and contributions</p>
 
       <div>
         {(data || []).map((project, index) => (

@@ -11,7 +11,7 @@ import SkillsSection from './sections/SkillsSection';
 import PreviewSection from './sections/PreviewSection';
 import SectionNavigation from './SectionNavigation';
 
-function MainContent({ steps, currentStep, resumeData, onUpdateData, onStepChange, onExportJson }) {
+function MainContent({ steps, currentStep, resumeData, onUpdateData, onStepChange, onExportJson, theme }) {
   const renderSection = () => {
     const step = steps[currentStep];
     switch (step) {
@@ -29,6 +29,11 @@ function MainContent({ steps, currentStep, resumeData, onUpdateData, onStepChang
           <WebsitesSection 
             data={resumeData.websites}
             onUpdate={(data) => onUpdateData('websites', data)}
+            sectionNames={resumeData.sectionNames}
+            onUpdateSectionNames={(key, value) => {
+              const updatedSectionNames = { ...resumeData.sectionNames, [key]: value };
+              onUpdateData('sectionNames', updatedSectionNames);
+            }}
           />
         );
       case 'summary':
@@ -36,6 +41,11 @@ function MainContent({ steps, currentStep, resumeData, onUpdateData, onStepChang
           <SummarySection 
             data={resumeData.summary}
             onUpdate={(data) => onUpdateData('summary', data)}
+            sectionNames={resumeData.sectionNames}
+            onUpdateSectionNames={(key, value) => {
+              const updatedSectionNames = { ...resumeData.sectionNames, [key]: value };
+              onUpdateData('sectionNames', updatedSectionNames);
+            }}
           />
         );
       case 'experience':
@@ -43,6 +53,11 @@ function MainContent({ steps, currentStep, resumeData, onUpdateData, onStepChang
           <ExperienceSection 
             data={resumeData.experience}
             onUpdate={(data) => onUpdateData('experience', data)}
+            sectionNames={resumeData.sectionNames}
+            onUpdateSectionNames={(key, value) => {
+              const updatedSectionNames = { ...resumeData.sectionNames, [key]: value };
+              onUpdateData('sectionNames', updatedSectionNames);
+            }}
           />
         );
       case 'education':
@@ -50,6 +65,11 @@ function MainContent({ steps, currentStep, resumeData, onUpdateData, onStepChang
           <EducationSection 
             data={resumeData.education}
             onUpdate={(data) => onUpdateData('education', data)}
+            sectionNames={resumeData.sectionNames}
+            onUpdateSectionNames={(key, value) => {
+              const updatedSectionNames = { ...resumeData.sectionNames, [key]: value };
+              onUpdateData('sectionNames', updatedSectionNames);
+            }}
           />
         );
       case 'projects':
@@ -57,6 +77,11 @@ function MainContent({ steps, currentStep, resumeData, onUpdateData, onStepChang
           <ProjectsSection 
             data={resumeData.projects}
             onUpdate={(data) => onUpdateData('projects', data)}
+            sectionNames={resumeData.sectionNames}
+            onUpdateSectionNames={(key, value) => {
+              const updatedSectionNames = { ...resumeData.sectionNames, [key]: value };
+              onUpdateData('sectionNames', updatedSectionNames);
+            }}
           />
         );
       case 'custom':
@@ -71,6 +96,11 @@ function MainContent({ steps, currentStep, resumeData, onUpdateData, onStepChang
           <SkillsSection 
             data={resumeData.skills}
             onUpdate={(data) => onUpdateData('skills', data)}
+            sectionNames={resumeData.sectionNames}
+            onUpdateSectionNames={(key, value) => {
+              const updatedSectionNames = { ...resumeData.sectionNames, [key]: value };
+              onUpdateData('sectionNames', updatedSectionNames);
+            }}
           />
         );
       case 'preview':
@@ -79,6 +109,8 @@ function MainContent({ steps, currentStep, resumeData, onUpdateData, onStepChang
             steps={steps}
             resumeData={resumeData}
             onExportJson={onExportJson}
+            theme={theme}
+            onUpdateData={onUpdateData}
           />
         );
       default:

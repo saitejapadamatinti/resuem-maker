@@ -34,7 +34,7 @@ function Header({ theme = 'classic', onChangeTheme, onImportResume, onImportPdf 
           <h1 className="app-title">ATS Resume Builder</h1>
         </div>
         <div className="header-right">
-          <button className="btn btn--outline" onClick={handleImportClick}>Import JSON/PDF</button>
+          
           <input 
             ref={fileInputRef}
             type="file"
@@ -42,7 +42,10 @@ function Header({ theme = 'classic', onChangeTheme, onImportResume, onImportPdf 
             onChange={handleFileChange}
             style={{ display: 'none' }}
           />
-          <select className="form-control" value={theme} onChange={(e) => onChangeTheme && onChangeTheme(e.target.value)}>
+          <select className="form-control" value={theme} onChange={(e) => {
+            console.log('Theme changed in Header to:', e.target.value);
+            onChangeTheme && onChangeTheme(e.target.value);
+          }}>
             <option value="classic">Classic</option>
             <option value="modern">Modern</option>
             <option value="elegant">Elegant</option>
@@ -50,6 +53,7 @@ function Header({ theme = 'classic', onChangeTheme, onImportResume, onImportPdf 
             <option value="professional">Professional</option>
             <option value="twocol">Two Column</option>
           </select>
+          <button className="btn btn--outline" onClick={handleImportClick}>Import JSON/PDF</button>
         </div>
       </div>
     </header>

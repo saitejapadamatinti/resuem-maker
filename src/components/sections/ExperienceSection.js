@@ -1,70 +1,120 @@
 import React, { useState } from 'react';
 
-function ExperienceSection({ data, onUpdate }) {
-  const [experienceCounter, setExperienceCounter] = useState(1);
+function ExperienceSection({ data, onUpdate, sectionNames, onUpdateSectionNames }) {
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editingTitle, setEditingTitle] = useState(sectionNames?.experience || 'Work Experience');
 
   const addExperience = () => {
-    const newExperience = {
-      id: experienceCounter,
+    const newExp = {
+      id: Date.now(),
       title: '',
       company: '',
       location: '',
       startDate: '',
       endDate: '',
-      achievements: ['']
+      achievements: []
     };
-    
-    onUpdate([...data, newExperience]);
-    setExperienceCounter(prev => prev + 1);
+    onUpdate([...data, newExp]);
   };
 
   const updateExperience = (id, field, value) => {
-    const updatedData = data.map(exp => 
+    onUpdate(data.map(exp => 
       exp.id === id ? { ...exp, [field]: value } : exp
-    );
-    onUpdate(updatedData);
-  };
-
-  const updateAchievement = (expId, index, value) => {
-    const updatedData = data.map(exp => {
-      if (exp.id === expId) {
-        const newAchievements = [...exp.achievements];
-        newAchievements[index] = value;
-        return { ...exp, achievements: newAchievements };
-      }
-      return exp;
-    });
-    onUpdate(updatedData);
+    ));
   };
 
   const addAchievement = (expId) => {
-    const updatedData = data.map(exp => {
-      if (exp.id === expId) {
-        return { ...exp, achievements: [...exp.achievements, ''] };
-      }
-      return exp;
-    });
-    onUpdate(updatedData);
+    onUpdate(data.map(exp => 
+      exp.id === expId 
+        ? { ...exp, achievements: [...exp.achievements, ''] }
+        : exp
+    ));
+  };
+
+  const updateAchievement = (expId, index, value) => {
+    onUpdate(data.map(exp => 
+      exp.id === expId 
+        ? { 
+            ...exp, 
+            achievements: exp.achievements.map((achievement, i) => 
+              i === index ? value : achievement
+            )
+          }
+        : exp
+    ));
   };
 
   const removeAchievement = (expId, index) => {
-    const updatedData = data.map(exp => {
-      if (exp.id === expId) {
-        const newAchievements = exp.achievements.filter((_, i) => i !== index);
-        return { ...exp, achievements: newAchievements };
-      }
-      return exp;
-    });
-    onUpdate(updatedData);
+    onUpdate(data.map(exp => 
+      exp.id === expId 
+        ? { 
+            ...exp, 
+            achievements: exp.achievements.filter((_, i) => i !== index)
+          }
+        : exp
+    ));
   };
 
   const removeExperience = (id) => {
     onUpdate(data.filter(exp => exp.id !== id));
   };
 
+  const handleTitleSave = () => {
+    if (onUpdateSectionNames && editingTitle.trim()) {
+      onUpdateSectionNames('experience', editingTitle.trim());
+    }
+    setIsEditingTitle(false);
+  };
+
+  const handleTitleCancel = () => {
+    setEditingTitle(sectionNames?.experience || 'Work Experience');
+    setIsEditingTitle(false);
+  };
+
   return (
     <section className="section active">
-      <h2>Work Experience</h2>
+      <div className="section-header-with-edit">
+        {isEditingTitle ? (
+          <div className="title-edit-container">
+            <input
+              type="text"
+              className="title-edit-input"
+              value={editingTitle}
+              onChange={(e) => setEditingTitle(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleTitleSave();
+                if (e.key === 'Escape') handleTitleCancel();
+              }}
+              autoFocus
+            />
+            <div className="title-edit-actions">
+              <button 
+                className="btn btn--sm btn--primary" 
+                onClick={handleTitleSave}
+              >
+                ✓
+              </button>
+              <button 
+                className="btn btn--sm btn--outline" 
+                onClick={handleTitleCancel}
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="section-title-display">
+            <h2>{sectionNames?.experience || 'Work Experience'}</h2>
+            <button 
+              className="btn btn--sm btn--outline title-edit-btn"
+              onClick={() => setIsEditingTitle(true)}
+              title="Edit section title"
+            >
+              ✏️
+            </button>
+          </div>
+        )}
+      </div>
       <p className="section-description">List your work history in reverse chronological order</p>
       
       <div id="experience-list">

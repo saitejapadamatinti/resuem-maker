@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
-function PreviewSection({ steps = [], resumeData, onExportJson }) {
+function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic', onUpdateData }) {
   const [pageGuides, setPageGuides] = useState([]);
   const [sectionGap, setSectionGap] = useState(10); // Default gap in pixels
   const [isStyleModalOpen, setIsStyleModalOpen] = useState(false);
+  const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
   const [fontFamily, setFontFamily] = useState('Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif');
   const [fontSize, setFontSize] = useState(16);
   const [lineHeight, setLineHeight] = useState(1.4);
@@ -18,6 +19,9 @@ function PreviewSection({ steps = [], resumeData, onExportJson }) {
   const [dividerStyle, setDividerStyle] = useState('solid');
   const [showGuides, setShowGuides] = useState(true);
   const [atsFriendly, setAtsFriendly] = useState(true);
+
+  // Debug theme
+  console.log('PreviewSection received theme:', theme);
 
   // A4 in points used by jsPDF
   const A4_WIDTH_PT = 595.28;
@@ -436,18 +440,34 @@ function PreviewSection({ steps = [], resumeData, onExportJson }) {
   ];
 
   const renderSectionByKey = (key) => {
+    const getSectionTitle = (sectionKey) => {
+      return resumeData.sectionNames?.[sectionKey] || getDefaultSectionTitle(sectionKey);
+    };
+
+    const getDefaultSectionTitle = (sectionKey) => {
+      const defaultTitles = {
+        summary: 'Professional Summary',
+        experience: 'Work Experience',
+        education: 'Education',
+        projects: 'Projects',
+        skills: 'Skills',
+        websites: 'Websites & Links'
+      };
+      return defaultTitles[sectionKey] || sectionKey;
+    };
+
     switch (key) {
       case 'summary':
         return resumeData.summary && (
           <div className="resume-section" key="summary">
-            <h2>Professional Summary</h2>
+            <h2>{getSectionTitle('summary')}</h2>
             <div dangerouslySetInnerHTML={{ __html: resumeData.summary }} />
           </div>
         );
       case 'experience':
         return resumeData.experience.length > 0 && (
           <div className="resume-section" key="experience">
-            <h2>Work Experience</h2>
+            <h2>{getSectionTitle('experience')}</h2>
             {resumeData.experience.map(exp => (
               <div key={exp.id} className="experience-entry">
                 <div className="entry-header">
@@ -473,7 +493,7 @@ function PreviewSection({ steps = [], resumeData, onExportJson }) {
       case 'projects':
         return resumeData.projects && resumeData.projects.length > 0 && (
           <div className="resume-section" key="projects">
-            <h2>Projects</h2>
+            <h2>{getSectionTitle('projects')}</h2>
             {resumeData.projects.map(project => (
               <div key={project.id} className="experience-entry">
                 <div className="entry-header">
@@ -511,7 +531,7 @@ function PreviewSection({ steps = [], resumeData, onExportJson }) {
       case 'education':
         return resumeData.education.length > 0 && (
           <div className="resume-section" key="education">
-            <h2>Education</h2>
+            <h2>{getSectionTitle('education')}</h2>
             {resumeData.education.map(edu => (
               <div key={edu.id} className="education-entry">
                 <div className="entry-header">
@@ -530,7 +550,7 @@ function PreviewSection({ steps = [], resumeData, onExportJson }) {
       case 'skills':
         return allSkills.length > 0 && (
           <div className="resume-section" key="skills">
-            <h2>Skills</h2>
+            <h2>{getSectionTitle('skills')}</h2>
             <div className="preview-skills">
               {allSkills.map(skill => (
                 <span key={skill} className="preview-skill">{skill}</span>
@@ -541,7 +561,7 @@ function PreviewSection({ steps = [], resumeData, onExportJson }) {
       case 'websites':
         return resumeData.websites && resumeData.websites.length > 0 && (
           <div className="resume-section" key="websites">
-            <h2>Websites • Portfolios • Profiles</h2>
+            <h2>{getSectionTitle('websites')}</h2>
             <div className="website-links">
               {resumeData.websites.map(item => (
                 <div key={item.id || item.url} className="website-item">
@@ -573,13 +593,26 @@ function PreviewSection({ steps = [], resumeData, onExportJson }) {
               <div className="resume-section" key={sec.id}>
                 {sec.title && <h2>{sec.title}</h2>}
                 {Array.isArray(sec.items) && sec.items.length > 0 && (
-                  <ul className="entry-achievements">
+                  <div className="custom-section-content">
                     {sec.items.map((it, idx) => (
-                      <li key={idx}>
-                        <span dangerouslySetInnerHTML={{ __html: it }} />
-                      </li>
+                      <div key={idx} className={`custom-section-item-preview separator-${sec.separator || 'dots'}`}>
+                        {sec.separator !== 'none' && (
+                          <span className="preview-separator">
+                            {sec.separator === 'dots' && '•'}
+                            {sec.separator === 'lines' && '▬'}
+                            {sec.separator === 'arrows' && '▶'}
+                            {sec.separator === 'circles' && '●'}
+                            {sec.separator === 'stars' && '★'}
+                            {sec.separator === 'hearts' && '♥'}
+                            {sec.separator === 'diamonds' && '♦'}
+                            {sec.separator === 'squares' && '■'}
+                            {sec.separator === 'triangles' && '▲'}
+                          </span>
+                        )}
+                        <div className="preview-content" dangerouslySetInnerHTML={{ __html: it }} />
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 )}
               </div>
             ))}
@@ -595,8 +628,20 @@ function PreviewSection({ steps = [], resumeData, onExportJson }) {
       <h2>Resume Preview</h2>
       <p className="section-description">Preview how your resume will appear when downloaded</p>
       
+      {/* Theme indicator for debugging */}
+      <div style={{ 
+        padding: '8px 16px', 
+        background: '#f0f0f0', 
+        borderRadius: '8px', 
+        marginBottom: '16px',
+        fontSize: '14px',
+        color: '#666'
+      }}>
+        Current Theme: <strong>{theme}</strong>
+      </div>
+      
       <div 
-        className={`resume-preview ${atsFriendly ? 'ats-friendly' : ''} theme-${(document.querySelector('[data-theme]')?.getAttribute('data-theme')) || 'classic'}`}
+        className={`resume-preview ${atsFriendly ? 'ats-friendly' : ''} theme-${theme}`}
         style={{ 
           position: 'relative',
           ['--resume-font-family']: fontFamily,
@@ -658,58 +703,8 @@ function PreviewSection({ steps = [], resumeData, onExportJson }) {
         <button className="btn btn--outline btn--lg" onClick={() => setIsStyleModalOpen(true)}>
           Style & Layout
         </button>
-        <button className="btn btn--outline btn--lg" onClick={exportPlainText}>
-          Export Plain Text
-        </button>
-        <div className="pdf-options">
-          <h4>Download PDF (Choose Quality)</h4>
-          <div className="pdf-quality-buttons">
-            <button 
-              className="btn btn--primary btn--lg" 
-              onClick={() => downloadPDF('standard')}
-              title={`Standard quality - ${estimateFileSize('standard')} - ${getClarityLevel('standard')} clarity`}
-            >
-              Standard Quality
-              <span className="file-size">({estimateFileSize('standard')})</span>
-              <span className="clarity-level">🎯 {getClarityLevel('standard')} Clarity</span>
-            </button>
-            <button 
-              className="btn btn--outline btn--lg" 
-              onClick={() => downloadPDF('small')}
-              title={`Small file size - ${estimateFileSize('small')} - ${getClarityLevel('small')} clarity`}
-            >
-              Small File
-              <span className="file-size">({estimateFileSize('small')})</span>
-              <span className="clarity-level">📱 {getClarityLevel('small')} Clarity</span>
-            </button>
-            <button 
-              className="btn btn--outline btn--lg" 
-              onClick={() => downloadPDF('high')}
-              title={`High quality - ${estimateFileSize('high')} - ${getClarityLevel('high')} clarity`}
-            >
-              High Quality
-              <span className="file-size">({estimateFileSize('high')})</span>
-              <span className="clarity-level">✨ {getClarityLevel('high')} Clarity</span>
-            </button>
-          </div>
-          <p className="file-size-note">
-            💡 <strong>Recommended:</strong> Use "Standard Quality" for best balance of clarity and file size
-          </p>
-          <p className="file-size-limit">
-            📋 <strong>File Size Limit:</strong> Maximum 2MB for most email systems and job portals
-          </p>
-          <p className="content-complexity">
-            📊 <strong>Content Analysis:</strong> {getContentBasedEstimate()}
-          </p>
-          <p className="quality-info">
-            🎨 <strong>Quality Features:</strong> Enhanced text rendering, smart compression, and optimized page breaks for maximum clarity
-          </p>
-        </div>
-        <button className="btn btn--outline btn--lg" onClick={onExportJson}>
-          Export JSON
-        </button>
-        <button className="btn btn--outline btn--lg" onClick={printResume}>
-          Print Resume
+        <button className="btn btn--outline btn--lg" onClick={() => setIsDownloadModalOpen(true)}>
+          📥 Download & Export
         </button>
       </div>
 
@@ -847,6 +842,204 @@ function PreviewSection({ steps = [], resumeData, onExportJson }) {
             </div>
             <div className="modal-footer">
               <button className="btn btn--primary" onClick={() => setIsStyleModalOpen(false)}>Done</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Download & Export Modal */}
+      {isDownloadModalOpen && (
+        <div className="modal-overlay" onClick={() => setIsDownloadModalOpen(false)}>
+          <div className="modal download-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>📥 Download & Export Options</h3>
+              <p className="modal-subtitle">Choose how you'd like to save or share your resume</p>
+              <button className="modal-close" onClick={() => setIsDownloadModalOpen(false)} aria-label="Close">
+                ✕
+              </button>
+            </div>
+            
+            <div className="modal-body">
+              {/* PDF Download Section */}
+              <div className="download-section">
+                <h4>📄 PDF Download</h4>
+                <p className="section-description">Download your resume as a professional PDF document</p>
+                
+                <div className="pdf-quality-options">
+                  <div className="quality-option">
+                    <button 
+                      className="btn btn--primary btn--lg quality-btn" 
+                      onClick={() => {
+                        downloadPDF('standard');
+                        setIsDownloadModalOpen(false);
+                      }}
+                    >
+                      <div className="quality-header">
+                        <span className="quality-icon">🎯</span>
+                        <span className="quality-title">Standard Quality</span>
+                      </div>
+                      <div className="quality-details">
+                        <span className="file-size">{estimateFileSize('standard')}</span>
+                        <span className="clarity-level">{getClarityLevel('standard')} Clarity</span>
+                      </div>
+                      <div className="quality-badge">Recommended</div>
+                    </button>
+                  </div>
+                  
+                  <div className="quality-option">
+                    <button 
+                      className="btn btn--outline btn--lg quality-btn" 
+                      onClick={() => {
+                        downloadPDF('small');
+                        setIsDownloadModalOpen(false);
+                      }}
+                    >
+                      <div className="quality-header">
+                        <span className="quality-icon">📱</span>
+                        <span className="quality-title">Small File</span>
+                      </div>
+                      <div className="quality-details">
+                        <span className="file-size">{estimateFileSize('small')}</span>
+                        <span className="clarity-level">{getClarityLevel('small')} Clarity</span>
+                      </div>
+                      <div className="quality-badge">Email Friendly</div>
+                    </button>
+                  </div>
+                  
+                  <div className="quality-option">
+                    <button 
+                      className="btn btn--outline btn--lg quality-btn" 
+                      onClick={() => {
+                        downloadPDF('high');
+                        setIsDownloadModalOpen(false);
+                      }}
+                    >
+                      <div className="quality-header">
+                        <span className="quality-icon">✨</span>
+                        <span className="quality-title">High Quality</span>
+                      </div>
+                      <div className="quality-details">
+                        <span className="file-size">{estimateFileSize('high')}</span>
+                        <span className="clarity-level">{getClarityLevel('high')} Clarity</span>
+                      </div>
+                      <div className="quality-badge">Print Ready</div>
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="quality-info">
+                  <p className="file-size-note">
+                    💡 <strong>Recommended:</strong> Use "Standard Quality" for best balance of clarity and file size
+                  </p>
+                  <p className="file-size-limit">
+                    📋 <strong>File Size Limit:</strong> Maximum 2MB for most email systems and job portals
+                  </p>
+                  <p className="content-complexity">
+                    📊 <strong>Content Analysis:</strong> {getContentBasedEstimate()}
+                  </p>
+                </div>
+              </div>
+
+              {/* Export Options Section */}
+              <div className="download-section">
+                <h4>📤 Export Options</h4>
+                <p className="section-description">Export your resume in different formats for various use cases</p>
+                
+                <div className="export-options">
+                  <button 
+                    className="btn btn--outline btn--lg export-btn"
+                    onClick={() => {
+                      exportPlainText();
+                      setIsDownloadModalOpen(false);
+                    }}
+                  >
+                    <span className="export-icon">📝</span>
+                    <div className="export-content">
+                      <span className="export-title">Plain Text</span>
+                      <span className="export-description">Simple text format for ATS systems</span>
+                    </div>
+                  </button>
+                  
+                  <button 
+                    className="btn btn--outline btn--lg export-btn"
+                    onClick={() => {
+                      onExportJson();
+                      setIsDownloadModalOpen(false);
+                    }}
+                  >
+                    <span className="export-icon">💾</span>
+                    <div className="export-content">
+                      <span className="export-title">JSON Data</span>
+                      <span className="export-description">Raw data for backup or import</span>
+                    </div>
+                  </button>
+                  
+                  <button 
+                    className="btn btn--outline btn--lg export-btn"
+                    onClick={() => {
+                      printResume();
+                      setIsDownloadModalOpen(false);
+                    }}
+                  >
+                    <span className="export-icon">🖨️</span>
+                    <div className="export-content">
+                      <span className="export-title">Print</span>
+                      <span className="export-description">Send to printer or save as PDF</span>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="download-section">
+                <h4>⚡ Quick Actions</h4>
+                <p className="section-description">Common actions for your resume</p>
+                
+                <div className="quick-actions">
+                  <button 
+                    className="btn btn--outline btn--sm quick-btn"
+                    onClick={() => {
+                      window.open('mailto:?subject=My Resume&body=Please find my resume attached.', '_blank');
+                      setIsDownloadModalOpen(false);
+                    }}
+                  >
+                    📧 Email Resume
+                  </button>
+                  
+                  <button 
+                    className="btn btn--outline btn--sm quick-btn"
+                    onClick={() => {
+                      navigator.clipboard.writeText(window.location.href);
+                      setIsDownloadModalOpen(false);
+                    }}
+                  >
+                    🔗 Copy Link
+                  </button>
+                  
+                  <button 
+                    className="btn btn--outline btn--sm quick-btn"
+                    onClick={() => {
+                      const element = document.querySelector('.resume-preview');
+                      if (element) {
+                        html2canvas(element, { scale: 2 }).then(canvas => {
+                          const link = document.createElement('a');
+                          link.download = 'resume-screenshot.png';
+                          link.href = canvas.toDataURL();
+                          link.click();
+                        });
+                      }
+                      setIsDownloadModalOpen(false);
+                    }}
+                  >
+                    📸 Screenshot
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <div className="modal-footer">
+              <button className="btn btn--outline" onClick={() => setIsDownloadModalOpen(false)}>Cancel</button>
+              <button className="btn btn--primary" onClick={() => setIsDownloadModalOpen(false)}>Done</button>
             </div>
           </div>
         </div>

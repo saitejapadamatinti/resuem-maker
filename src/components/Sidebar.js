@@ -135,8 +135,9 @@ function Sidebar({ currentStep, steps, progress, onStepClick, onReorderSteps, on
           className="btn btn--primary btn--full-width" 
           onClick={() => onAddCustom && onAddCustom('Custom Section')}
           style={{ marginTop: 8 }}
+          title="Add a custom section with templates"
         >
-          + Add Custom Section
+          📋 Add Custom Section
         </button>
       </div>
     </nav>

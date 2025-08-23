@@ -31,9 +31,22 @@ function App() {
     education: [],
     projects: [],
     customSections: [],
-    skills: { technical: [], soft: [], other: [] }
+    skills: { technical: [], soft: [], other: [] },
+    sectionNames: {
+      summary: 'Professional Summary',
+      experience: 'Work Experience',
+      education: 'Education',
+      projects: 'Projects',
+      skills: 'Skills',
+      websites: 'Websites & Links'
+    }
   });
   const [theme, setTheme] = useState('classic');
+
+  // Debug theme changes
+  useEffect(() => {
+    console.log('Theme changed to:', theme);
+  }, [theme]);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -81,6 +94,7 @@ function App() {
   useEffect(() => {
     try {
       const savedTheme = localStorage.getItem('ats-resume-builder:theme');
+      console.log('Loading theme from localStorage:', savedTheme);
       if (savedTheme) setTheme(savedTheme);
     } catch {}
   }, []);
@@ -121,7 +135,15 @@ function App() {
       experience: sample.experience || [],
       education: sample.education || [],
       projects: sample.projects || [],
-      skills: sample.skills || { technical: [], soft: [], other: [] }
+      skills: sample.skills || { technical: [], soft: [], other: [] },
+      sectionNames: {
+        summary: 'Professional Summary',
+        experience: 'Work Experience',
+        education: 'Education',
+        projects: 'Projects',
+        skills: 'Skills',
+        websites: 'Websites & Links'
+      }
     });
     setCurrentStep(0);
   };
@@ -144,7 +166,23 @@ function App() {
       localStorage.removeItem(STORAGE_STEPS_KEY);
       localStorage.removeItem(STORAGE_STEP_INDEX_KEY);
     } catch {}
-    setResumeData({ contact: {}, websites: [], summary: '', experience: [], education: [], projects: [], skills: { technical: [], soft: [], other: [] } });
+    setResumeData({ 
+      contact: {}, 
+      websites: [], 
+      summary: '', 
+      experience: [], 
+      education: [], 
+      projects: [], 
+      skills: { technical: [], soft: [], other: [] },
+      sectionNames: {
+        summary: 'Professional Summary',
+        experience: 'Work Experience',
+        education: 'Education',
+        projects: 'Projects',
+        skills: 'Skills',
+        websites: 'Websites & Links'
+      }
+    });
     setSteps(['usage-guide', 'contact', 'websites', 'summary', 'experience', 'education', 'projects', 'skills', 'preview']);
     setCurrentStep(0);
   };
@@ -209,7 +247,15 @@ function App() {
           };
         }
         return { technical: [], soft: [], other: [] };
-      })()
+      })(),
+      sectionNames: source.sectionNames || {
+        summary: 'Professional Summary',
+        experience: 'Work Experience',
+        education: 'Education',
+        projects: 'Projects',
+        skills: 'Skills',
+        websites: 'Websites & Links'
+      }
     };
 
     directShape.experience = (directShape.experience || []).map((e, idx) => ({ id: e.id || idx + 1, ...e }));
@@ -338,7 +384,15 @@ function App() {
         experience: sections.experience,
         education: sections.education,
         projects: sections.projects,
-        skills: sections.skills
+        skills: sections.skills,
+        sectionNames: {
+          summary: 'Professional Summary',
+          experience: 'Work Experience',
+          education: 'Education',
+          projects: 'Projects',
+          skills: 'Skills',
+          websites: 'Websites & Links'
+        }
       });
       setCurrentStep(0);
     } catch (e) {
@@ -394,6 +448,7 @@ function App() {
           onUpdateData={updateResumeData}
           onStepChange={goToStep}
           onExportJson={exportJson}
+          theme={theme}
         />
         <ATSPanel 
           resumeData={resumeData}

@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { applicationData } from '../../data/applicationData';
 
-function SkillsSection({ data, onUpdate }) {
+function SkillsSection({ data, onUpdate, sectionNames, onUpdateSectionNames }) {
   const [skillInput, setSkillInput] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editingTitle, setEditingTitle] = useState(sectionNames?.skills || 'Skills');
 
   const extraSkills = [
     "JavaScript","TypeScript","Python","Java","C","C++","C#","Go","Rust","Ruby","PHP","Swift","Kotlin","R","MATLAB",
@@ -89,9 +91,62 @@ function SkillsSection({ data, onUpdate }) {
     setShowSuggestions(false);
   };
 
+  const handleTitleSave = () => {
+    if (onUpdateSectionNames && editingTitle.trim()) {
+      onUpdateSectionNames('skills', editingTitle.trim());
+    }
+    setIsEditingTitle(false);
+  };
+
+  const handleTitleCancel = () => {
+    setEditingTitle(sectionNames?.skills || 'Skills');
+    setIsEditingTitle(false);
+  };
+
   return (
     <section className="section active">
-      <h2>Skills</h2>
+      <div className="section-header-with-edit">
+        {isEditingTitle ? (
+          <div className="title-edit-container">
+            <input
+              type="text"
+              className="title-edit-input"
+              value={editingTitle}
+              onChange={(e) => setEditingTitle(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleTitleSave();
+                if (e.key === 'Escape') handleTitleCancel();
+              }}
+              autoFocus
+            />
+            <div className="title-edit-actions">
+              <button 
+                className="btn btn--sm btn--primary" 
+                onClick={handleTitleSave}
+              >
+                ✓
+              </button>
+              <button 
+                className="btn btn--sm btn--outline" 
+                onClick={handleTitleCancel}
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="section-title-display">
+            <h2>{sectionNames?.skills || 'Skills'}</h2>
+            <button 
+              className="btn btn--sm btn--outline title-edit-btn"
+              onClick={() => setIsEditingTitle(true)}
+              title="Edit section title"
+            >
+              ✏️
+            </button>
+          </div>
+        )}
+      </div>
       <p className="section-description">List both technical and soft skills relevant to your target role</p>
       
       <div className="skills-input-group">

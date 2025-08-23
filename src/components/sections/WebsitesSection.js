@@ -1,31 +1,85 @@
 import React, { useState } from 'react';
 
-function WebsitesSection({ data, onUpdate }) {
-  const [counter, setCounter] = useState(1);
+function WebsitesSection({ data, onUpdate, sectionNames, onUpdateSectionNames }) {
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editingTitle, setEditingTitle] = useState(sectionNames?.websites || 'Websites & Links');
 
   const addWebsite = () => {
-    const newItem = {
-      id: counter,
+    const newWebsite = {
+      id: Date.now(),
       label: '',
       url: ''
     };
-    onUpdate([...(data || []), newItem]);
-    setCounter(prev => prev + 1);
+    onUpdate([...data, newWebsite]);
   };
 
   const updateWebsite = (id, field, value) => {
-    const updated = (data || []).map(w => w.id === id ? { ...w, [field]: value } : w);
-    onUpdate(updated);
+    onUpdate(data.map(website => 
+      website.id === id ? { ...website, [field]: value } : website
+    ));
   };
 
   const removeWebsite = (id) => {
-    onUpdate((data || []).filter(w => w.id !== id));
+    onUpdate(data.filter(website => website.id !== id));
+  };
+
+  const handleTitleSave = () => {
+    if (onUpdateSectionNames && editingTitle.trim()) {
+      onUpdateSectionNames('websites', editingTitle.trim());
+    }
+    setIsEditingTitle(false);
+  };
+
+  const handleTitleCancel = () => {
+    setEditingTitle(sectionNames?.websites || 'Websites & Links');
+    setIsEditingTitle(false);
   };
 
   return (
     <section className="section active">
-      <h2>Websites, Portfolios, Profiles</h2>
-      <p className="section-description">Add links to your personal website, portfolio, GitHub, LinkedIn, etc.</p>
+      <div className="section-header-with-edit">
+        {isEditingTitle ? (
+          <div className="title-edit-container">
+            <input
+              type="text"
+              className="title-edit-input"
+              value={editingTitle}
+              onChange={(e) => setEditingTitle(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleTitleSave();
+                if (e.key === 'Escape') handleTitleCancel();
+              }}
+              autoFocus
+            />
+            <div className="title-edit-actions">
+              <button 
+                className="btn btn--sm btn--primary" 
+                onClick={handleTitleSave}
+              >
+                ✓
+              </button>
+              <button 
+                className="btn btn--sm btn--outline" 
+                onClick={handleTitleCancel}
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="section-title-display">
+            <h2>{sectionNames?.websites || 'Websites & Links'}</h2>
+            <button 
+              className="btn btn--sm btn--outline title-edit-btn"
+              onClick={() => setIsEditingTitle(true)}
+              title="Edit section title"
+            >
+              ✏️
+            </button>
+          </div>
+        )}
+      </div>
+      <p className="section-description">Add links to your portfolio, LinkedIn, GitHub, and other professional profiles</p>
 
       <div>
         {(data || []).map((item, index) => (

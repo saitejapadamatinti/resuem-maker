@@ -1,27 +1,107 @@
 @import './styles.css';
 
-
-@media screen and (max-width: 768px) {
-    .large-screen-message{
-       /* display: block; */
-       font-size: 40px;
-       height: 100%;
-       display: flex;
-       justify-content: center;
-       align-items: center;
-       color: blueviolet;
-       position: fixed;
-       top: 0;
-       left: 0;
-       right: 0;
-       bottom: 0;
-       z-index: 1000;
-       background-color: aliceblue;
+/* Mobile Screen Message - Show only on small screens */
+@media screen and (max-width: 767px) {
+    .large-screen-message {
+        font-size: 24px;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: var(--color-primary);
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1000;
+        background-color: var(--color-background);
+        text-align: center;
+        padding: var(--space-24);
+        font-weight: var(--font-weight-medium);
+        line-height: 1.4;
     }
 }
 
 @media screen and (min-width: 768px) {
-    .large-screen-message{
-        display: none;
+    .large-screen-message {
+        display: none !important;
     }
+}
+
+/* Global improvements for better alignment and spacing */
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+/* Ensure proper font rendering */
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* Fix for form elements alignment */
+.form-control {
+    vertical-align: middle;
+}
+
+/* Ensure buttons have consistent alignment */
+.btn {
+    vertical-align: middle;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Fix for flexbox alignment issues */
+.app-layout {
+    min-height: calc(100vh - 120px);
+    align-items: stretch;
+}
+
+/* Ensure proper modal positioning */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+}
+
+/* Fix for PDF options alignment */
+.pdf-quality-buttons {
+    align-items: stretch;
+}
+
+.pdf-quality-buttons .btn {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Ensure proper sidebar alignment */
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* Fix for main content scrolling */
+.main-content {
+    overflow-y: auto;
+    height: 100%;
+}
+
+/* Ensure proper ATS panel alignment */
+.ats-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
 }

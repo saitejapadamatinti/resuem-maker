@@ -1,35 +1,86 @@
 import React, { useState } from 'react';
 
-function EducationSection({ data, onUpdate }) {
-  const [educationCounter, setEducationCounter] = useState(1);
+function EducationSection({ data, onUpdate, sectionNames, onUpdateSectionNames }) {
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editingTitle, setEditingTitle] = useState(sectionNames?.education || 'Education');
 
   const addEducation = () => {
-    const newEducation = {
-      id: educationCounter,
+    const newEdu = {
+      id: Date.now(),
       degree: '',
       school: '',
       location: '',
       graduationDate: ''
     };
-    
-    onUpdate([...data, newEducation]);
-    setEducationCounter(prev => prev + 1);
+    onUpdate([...data, newEdu]);
   };
 
   const updateEducation = (id, field, value) => {
-    const updatedData = data.map(edu => 
+    onUpdate(data.map(edu => 
       edu.id === id ? { ...edu, [field]: value } : edu
-    );
-    onUpdate(updatedData);
+    ));
   };
 
   const removeEducation = (id) => {
     onUpdate(data.filter(edu => edu.id !== id));
   };
 
+  const handleTitleSave = () => {
+    if (onUpdateSectionNames && editingTitle.trim()) {
+      onUpdateSectionNames('education', editingTitle.trim());
+    }
+    setIsEditingTitle(false);
+  };
+
+  const handleTitleCancel = () => {
+    setEditingTitle(sectionNames?.education || 'Education');
+    setIsEditingTitle(false);
+  };
+
   return (
     <section className="section active">
-      <h2>Education</h2>
+      <div className="section-header-with-edit">
+        {isEditingTitle ? (
+          <div className="title-edit-container">
+            <input
+              type="text"
+              className="title-edit-input"
+              value={editingTitle}
+              onChange={(e) => setEditingTitle(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleTitleSave();
+                if (e.key === 'Escape') handleTitleCancel();
+              }}
+              autoFocus
+            />
+            <div className="title-edit-actions">
+              <button 
+                className="btn btn--sm btn--primary" 
+                onClick={handleTitleSave}
+              >
+                ✓
+              </button>
+              <button 
+                className="btn btn--sm btn--outline" 
+                onClick={handleTitleCancel}
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="section-title-display">
+            <h2>{sectionNames?.education || 'Education'}</h2>
+            <button 
+              className="btn btn--sm btn--outline title-edit-btn"
+              onClick={() => setIsEditingTitle(true)}
+              title="Edit section title"
+            >
+              ✏️
+            </button>
+          </div>
+        )}
+      </div>
       <p className="section-description">Include your degrees, certifications, and relevant coursework</p>
       
       <div id="education-list">
