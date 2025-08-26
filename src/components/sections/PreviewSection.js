@@ -96,7 +96,534 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
     return 'High complexity - may need "Small File" option for 2MB limit';
   };
 
-  const downloadPDF = async (quality = 'standard') => {
+  // Enhanced PDF generation with styled text-based output for better ATS compatibility
+  const generateTextBasedPdf = async () => {
+    try {
+      // Create text-based PDF using jsPDF directly with professional styling
+      const pdf = new jsPDF('p', 'pt', 'a4');
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 50;
+      let yPosition = margin;
+      
+      // Color scheme matching the visual design
+      const colors = {
+        primary: [79, 70, 229], // #4f46e5 - matches accentColor
+        text: [31, 41, 55], // #1f2937 - dark gray
+        secondary: [107, 114, 128], // #6b7280 - medium gray
+        light: [243, 244, 246] // #f3f4f6 - light gray
+      };
+      
+      // Generate styled content
+      await generateStyledContent(pdf, resumeData, colors, margin, pageWidth, pageHeight);
+      
+      // Save the PDF
+      const name = resumeData.contact.fullName ? resumeData.contact.fullName.replace(/\s+/g, '_') : 'resume';
+      pdf.save(`${name}_styled.pdf`);
+      
+      console.log('✅ Styled text-based PDF generated successfully!');
+      alert('✅ Styled PDF generated! This PDF maintains professional formatting while ensuring ATS compatibility with selectable text.');
+      
+    } catch (error) {
+      console.error('Styled PDF generation error:', error);
+      alert('❌ Failed to generate styled PDF. Please try the standard PDF option.');
+    }
+  };
+  
+  // Generate professionally styled PDF content
+  const generateStyledContent = async (pdf, data, colors, margin, pageWidth, pageHeight) => {
+    let yPos = margin;
+    const lineHeight = 16;
+    const sectionSpacing = 25;
+    
+    // Helper function to check page overflow and add new page if needed
+    const checkPageOverflow = (requiredSpace = 50) => {
+      if (yPos + requiredSpace > pageHeight - margin) {
+        pdf.addPage();
+        yPos = margin;
+        return true;
+      }
+      return false;
+    };
+    
+    // Helper function to draw section divider
+    const drawSectionDivider = (y, color = colors.primary) => {
+      pdf.setDrawColor(...color);
+      pdf.setLineWidth(1.5);
+      pdf.line(margin, y, pageWidth - margin, y);
+    };
+    
+    // 1. CONTACT HEADER (Styled like the visual resume)
+    if (data.contact) {
+      checkPageOverflow(80);
+      
+      // Name - Large and prominent
+      if (data.contact.fullName) {
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(24);
+        pdf.setTextColor(...colors.text);
+        
+        const nameWidth = pdf.getStringUnitWidth(data.contact.fullName) * 24 / pdf.internal.scaleFactor;
+        const nameX = (pageWidth - nameWidth) / 2; // Center the name
+        pdf.text(data.contact.fullName, nameX, yPos);
+        yPos += 35;
+        
+        // Add accent line under name
+        drawSectionDivider(yPos - 10, colors.primary);
+        yPos += 15;
+      }
+      
+      // Contact details in a professional layout
+      const contactDetails = [];
+      if (data.contact.email) contactDetails.push({ icon: '✉', text: data.contact.email });
+      if (data.contact.phone) contactDetails.push({ icon: '☎', text: data.contact.phone });
+      if (data.contact.location) contactDetails.push({ icon: '⌖', text: data.contact.location });
+      if (data.contact.linkedIn) contactDetails.push({ icon: '●', text: data.contact.linkedIn });
+      
+      if (contactDetails.length > 0) {
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(11);
+        pdf.setTextColor(...colors.secondary);
+        
+        // Arrange contact details in two columns if more than 2 items
+        const itemsPerRow = contactDetails.length > 2 ? 2 : contactDetails.length;
+        const colWidth = (pageWidth - 2 * margin) / itemsPerRow;
+        
+        contactDetails.forEach((detail, index) => {
+          const col = index % itemsPerRow;
+          const row = Math.floor(index / itemsPerRow);
+          const x = margin + (col * colWidth);
+          const y = yPos + (row * lineHeight);
+          
+          pdf.text(`${detail.icon} ${detail.text}`, x, y);
+        });
+        
+        yPos += Math.ceil(contactDetails.length / itemsPerRow) * lineHeight + sectionSpacing;
+      }
+    }
+    
+    // 2. PROFESSIONAL SUMMARY
+    if (data.summary && data.summary.trim()) {
+      checkPageOverflow(60);
+      
+      const summaryText = data.summary.replace(/<[^>]*>/g, '').trim();
+      if (summaryText) {
+        // Section title
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(14);
+        pdf.setTextColor(...colors.primary);
+        pdf.text('PROFESSIONAL SUMMARY', margin, yPos);
+        yPos += 20;
+        
+        drawSectionDivider(yPos - 10);
+        yPos += 10;
+        
+        // Summary content
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(11);
+        pdf.setTextColor(...colors.text);
+        
+        const textLines = pdf.splitTextToSize(summaryText, pageWidth - 2 * margin);
+        pdf.text(textLines, margin, yPos);
+        yPos += textLines.length * lineHeight + sectionSpacing;
+      }
+    }
+    
+    // 3. WORK EXPERIENCE
+    if (data.experience && data.experience.length > 0) {
+      checkPageOverflow(80);
+      
+      // Section title
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(14);
+      pdf.setTextColor(...colors.primary);
+      pdf.text('WORK EXPERIENCE', margin, yPos);
+      yPos += 20;
+      
+      drawSectionDivider(yPos - 10);
+      yPos += 15;
+      
+      data.experience.forEach((exp, index) => {
+        if (exp.title && exp.company) {
+          checkPageOverflow(100);
+          
+          // Job title - prominent and bold
+          pdf.setFont('helvetica', 'bold');
+          pdf.setFontSize(12);
+          pdf.setTextColor(...colors.text);
+          pdf.text(exp.title, margin, yPos);
+          yPos += 18;
+          
+          // Company and dates on same line
+          pdf.setFont('helvetica', 'normal');
+          pdf.setFontSize(11);
+          pdf.setTextColor(...colors.secondary);
+          
+          let companyDateLine = exp.company || '';
+          if (exp.startDate || exp.endDate) {
+            const startDate = exp.startDate || '';
+            const endDate = exp.endDate || 'Present';
+            companyDateLine += ` | ${startDate} - ${endDate}`;
+          }
+          
+          pdf.text(companyDateLine, margin, yPos);
+          yPos += 18;
+          
+          // Achievements with proper bullet formatting
+          if (exp.achievements && exp.achievements.length > 0) {
+            pdf.setFont('helvetica', 'normal');
+            pdf.setFontSize(10);
+            pdf.setTextColor(...colors.text);
+            
+            exp.achievements.forEach(achievement => {
+              const cleanText = achievement.replace(/<[^>]*>/g, '').replace(/^[•\-\*]\s*/, '').trim();
+              if (cleanText) {
+                checkPageOverflow(30);
+                
+                const bulletText = `• ${cleanText}`;
+                const textLines = pdf.splitTextToSize(bulletText, pageWidth - 2 * margin - 15);
+                pdf.text(textLines, margin + 10, yPos);
+                yPos += textLines.length * 14 + 3;
+              }
+            });
+          }
+          
+          yPos += 15; // Space between jobs
+        }
+      });
+      
+      yPos += 10; // Extra space after section
+    }
+    
+    // 4. EDUCATION
+    if (data.education && data.education.length > 0) {
+      checkPageOverflow(60);
+      
+      // Section title
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(14);
+      pdf.setTextColor(...colors.primary);
+      pdf.text('EDUCATION', margin, yPos);
+      yPos += 20;
+      
+      drawSectionDivider(yPos - 10);
+      yPos += 15;
+      
+      data.education.forEach(edu => {
+        if (edu.degree && edu.school) {
+          checkPageOverflow(50);
+          
+          // Degree
+          pdf.setFont('helvetica', 'bold');
+          pdf.setFontSize(12);
+          pdf.setTextColor(...colors.text);
+          pdf.text(edu.degree, margin, yPos);
+          yPos += 18;
+          
+          // School and graduation date
+          pdf.setFont('helvetica', 'normal');
+          pdf.setFontSize(11);
+          pdf.setTextColor(...colors.secondary);
+          
+          let schoolLine = edu.school;
+          if (edu.graduationDate) {
+            schoolLine += ` | ${edu.graduationDate}`;
+          }
+          
+          pdf.text(schoolLine, margin, yPos);
+          yPos += 15;
+          
+          // GPA if available
+          if (edu.gpa) {
+            pdf.setFont('helvetica', 'normal');
+            pdf.setFontSize(10);
+            pdf.setTextColor(...colors.text);
+            pdf.text(`GPA: ${edu.gpa}`, margin, yPos);
+            yPos += 15;
+          }
+          
+          yPos += 10;
+        }
+      });
+    }
+    
+    // 5. SKILLS
+    if (data.skills && (data.skills.technical?.length > 0 || data.skills.soft?.length > 0 || data.skills.other?.length > 0)) {
+      checkPageOverflow(60);
+      
+      // Section title
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(14);
+      pdf.setTextColor(...colors.primary);
+      pdf.text('SKILLS', margin, yPos);
+      yPos += 20;
+      
+      drawSectionDivider(yPos - 10);
+      yPos += 15;
+      
+      // Technical Skills
+      if (data.skills.technical && data.skills.technical.length > 0) {
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(11);
+        pdf.setTextColor(...colors.text);
+        pdf.text('Technical Skills:', margin, yPos);
+        yPos += 16;
+        
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(10);
+        pdf.setTextColor(...colors.text);
+        const techSkillsText = data.skills.technical.join(' • ');
+        const techLines = pdf.splitTextToSize(techSkillsText, pageWidth - 2 * margin);
+        pdf.text(techLines, margin + 10, yPos);
+        yPos += techLines.length * 14 + 12;
+      }
+      
+      // Soft Skills
+      if (data.skills.soft && data.skills.soft.length > 0) {
+        checkPageOverflow(30);
+        
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(11);
+        pdf.setTextColor(...colors.text);
+        pdf.text('Soft Skills:', margin, yPos);
+        yPos += 16;
+        
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(10);
+        pdf.setTextColor(...colors.text);
+        const softSkillsText = data.skills.soft.join(' • ');
+        const softLines = pdf.splitTextToSize(softSkillsText, pageWidth - 2 * margin);
+        pdf.text(softLines, margin + 10, yPos);
+        yPos += softLines.length * 14 + 12;
+      }
+      
+      // Other Skills
+      if (data.skills.other && data.skills.other.length > 0) {
+        checkPageOverflow(30);
+        
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(11);
+        pdf.setTextColor(...colors.text);
+        pdf.text('Other Skills:', margin, yPos);
+        yPos += 16;
+        
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(10);
+        pdf.setTextColor(...colors.text);
+        const otherSkillsText = data.skills.other.join(' • ');
+        const otherLines = pdf.splitTextToSize(otherSkillsText, pageWidth - 2 * margin);
+        pdf.text(otherLines, margin + 10, yPos);
+        yPos += otherLines.length * 14 + 12;
+      }
+    }
+    
+    // 6. PROJECTS
+    if (data.projects && data.projects.length > 0) {
+      checkPageOverflow(60);
+      
+      // Section title
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(14);
+      pdf.setTextColor(...colors.primary);
+      pdf.text('PROJECTS', margin, yPos);
+      yPos += 20;
+      
+      drawSectionDivider(yPos - 10);
+      yPos += 15;
+      
+      data.projects.forEach(project => {
+        if (project.name) {
+          checkPageOverflow(50);
+          
+          // Project name
+          pdf.setFont('helvetica', 'bold');
+          pdf.setFontSize(12);
+          pdf.setTextColor(...colors.text);
+          pdf.text(project.name, margin, yPos);
+          yPos += 18;
+          
+          // Project URL if available
+          if (project.url) {
+            pdf.setFont('helvetica', 'normal');
+            pdf.setFontSize(10);
+            pdf.setTextColor(...colors.secondary);
+            pdf.text(project.url, margin, yPos);
+            yPos += 15;
+          }
+          
+          // Project description
+          if (project.description) {
+            const cleanDesc = project.description.replace(/<[^>]*>/g, '').trim();
+            if (cleanDesc) {
+              pdf.setFont('helvetica', 'normal');
+              pdf.setFontSize(10);
+              pdf.setTextColor(...colors.text);
+              
+              const descLines = pdf.splitTextToSize(cleanDesc, pageWidth - 2 * margin);
+              pdf.text(descLines, margin, yPos);
+              yPos += descLines.length * 14 + 15;
+            }
+          }
+          
+          yPos += 10;
+        }
+      });
+    }
+  };
+  
+  // Extract structured text content from resume data
+  const extractResumeText = (data) => {
+    const sections = [];
+    
+    // Contact Information (Header)
+    if (data.contact) {
+      const contactContent = [];
+      
+      // Name as main header
+      if (data.contact.fullName) {
+        contactContent.push({ type: 'header', text: data.contact.fullName });
+      }
+      
+      // Contact details on separate lines
+      if (data.contact.email) {
+        contactContent.push({ type: 'text', text: `Email: ${data.contact.email}` });
+      }
+      if (data.contact.phone) {
+        contactContent.push({ type: 'text', text: `Phone: ${data.contact.phone}` });
+      }
+      if (data.contact.location) {
+        contactContent.push({ type: 'text', text: `Location: ${data.contact.location}` });
+      }
+      if (data.contact.linkedIn) {
+        contactContent.push({ type: 'text', text: `LinkedIn: ${data.contact.linkedIn}` });
+      }
+      
+      if (contactContent.length > 0) {
+        sections.push({ title: '', content: contactContent });
+      }
+    }
+    
+    // Professional Summary
+    if (data.summary && data.summary.trim()) {
+      const summaryText = data.summary.replace(/<[^>]*>/g, '').trim();
+      if (summaryText) {
+        sections.push({
+          title: 'Professional Summary',
+          content: [{ type: 'text', text: summaryText }]
+        });
+      }
+    }
+    
+    // Work Experience
+    if (data.experience && data.experience.length > 0) {
+      const expContent = [];
+      data.experience.forEach(exp => {
+        if (exp.title && exp.company) {
+          // Job title and company
+          expContent.push({ type: 'header', text: `${exp.title}` });
+          expContent.push({ type: 'subheader', text: `${exp.company}` });
+          
+          // Dates
+          if (exp.startDate || exp.endDate) {
+            const startDate = exp.startDate || '';
+            const endDate = exp.endDate || 'Present';
+            expContent.push({ type: 'text', text: `${startDate} - ${endDate}` });
+          }
+          
+          // Achievements
+          if (exp.achievements && exp.achievements.length > 0) {
+            exp.achievements.forEach(achievement => {
+              const cleanText = achievement.replace(/<[^>]*>/g, '').replace(/^[•\-\*]\s*/, '').trim();
+              if (cleanText) {
+                expContent.push({ type: 'bullet', text: cleanText });
+              }
+            });
+          }
+        }
+      });
+      
+      if (expContent.length > 0) {
+        sections.push({ title: 'Work Experience', content: expContent });
+      }
+    }
+    
+    // Education
+    if (data.education && data.education.length > 0) {
+      const eduContent = [];
+      data.education.forEach(edu => {
+        if (edu.degree && edu.school) {
+          eduContent.push({ type: 'header', text: edu.degree });
+          eduContent.push({ type: 'subheader', text: edu.school });
+          
+          if (edu.graduationDate) {
+            eduContent.push({ type: 'text', text: `Graduated: ${edu.graduationDate}` });
+          }
+          
+          if (edu.gpa) {
+            eduContent.push({ type: 'text', text: `GPA: ${edu.gpa}` });
+          }
+        }
+      });
+      
+      if (eduContent.length > 0) {
+        sections.push({ title: 'Education', content: eduContent });
+      }
+    }
+    
+    // Skills
+    if (data.skills) {
+      const skillsContent = [];
+      
+      if (data.skills.technical && data.skills.technical.length > 0) {
+        skillsContent.push({ type: 'subheader', text: 'Technical Skills' });
+        skillsContent.push({ type: 'text', text: data.skills.technical.join(', ') });
+      }
+      
+      if (data.skills.soft && data.skills.soft.length > 0) {
+        skillsContent.push({ type: 'subheader', text: 'Soft Skills' });
+        skillsContent.push({ type: 'text', text: data.skills.soft.join(', ') });
+      }
+      
+      if (data.skills.other && data.skills.other.length > 0) {
+        skillsContent.push({ type: 'subheader', text: 'Other Skills' });
+        skillsContent.push({ type: 'text', text: data.skills.other.join(', ') });
+      }
+      
+      if (skillsContent.length > 0) {
+        sections.push({ title: 'Skills', content: skillsContent });
+      }
+    }
+    
+    // Projects
+    if (data.projects && data.projects.length > 0) {
+      const projectsContent = [];
+      data.projects.forEach(project => {
+        if (project.name) {
+          projectsContent.push({ type: 'header', text: project.name });
+          
+          if (project.url) {
+            projectsContent.push({ type: 'text', text: `URL: ${project.url}` });
+          }
+          
+          if (project.description) {
+            const cleanDesc = project.description.replace(/<[^>]*>/g, '').trim();
+            if (cleanDesc) {
+              projectsContent.push({ type: 'text', text: cleanDesc });
+            }
+          }
+        }
+      });
+      
+      if (projectsContent.length > 0) {
+        sections.push({ title: 'Projects', content: projectsContent });
+      }
+    }
+    
+    return sections;
+  };
+
+  // Original image-based PDF generation (renamed for clarity)
+  const generateImageBasedPdf = async (quality = 'standard') => {
     const element = document.querySelector('.resume-preview');
     if (!element) return;
 
@@ -868,21 +1395,41 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
                 <div className="pdf-quality-options">
                   <div className="quality-option">
                     <button 
-                      className="btn btn--primary btn--lg quality-btn" 
+                      className="btn btn--success btn--lg quality-btn" 
                       onClick={() => {
-                        downloadPDF('standard');
+                        generateTextBasedPdf();
                         setIsDownloadModalOpen(false);
                       }}
                     >
                       <div className="quality-header">
                         <span className="quality-icon">🎯</span>
+                        <span className="quality-title">Styled Text PDF</span>
+                      </div>
+                      <div className="quality-details">
+                        <span className="file-size">~100-200KB</span>
+                        <span className="clarity-level">Professional + ATS</span>
+                      </div>
+                      <div className="quality-badge ats-badge">Best of Both</div>
+                    </button>
+                  </div>
+                  
+                  <div className="quality-option">
+                    <button 
+                      className="btn btn--primary btn--lg quality-btn" 
+                      onClick={() => {
+                        generateImageBasedPdf('standard');
+                        setIsDownloadModalOpen(false);
+                      }}
+                    >
+                      <div className="quality-header">
+                        <span className="quality-icon">🎨</span>
                         <span className="quality-title">Standard Quality</span>
                       </div>
                       <div className="quality-details">
                         <span className="file-size">{estimateFileSize('standard')}</span>
                         <span className="clarity-level">{getClarityLevel('standard')} Clarity</span>
                       </div>
-                      <div className="quality-badge">Recommended</div>
+                      <div className="quality-badge">Visual Format</div>
                     </button>
                   </div>
                   
@@ -890,7 +1437,7 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
                     <button 
                       className="btn btn--outline btn--lg quality-btn" 
                       onClick={() => {
-                        downloadPDF('small');
+                        generateImageBasedPdf('small');
                         setIsDownloadModalOpen(false);
                       }}
                     >
@@ -910,7 +1457,7 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
                     <button 
                       className="btn btn--outline btn--lg quality-btn" 
                       onClick={() => {
-                        downloadPDF('high');
+                        generateImageBasedPdf('high');
                         setIsDownloadModalOpen(false);
                       }}
                     >
@@ -928,8 +1475,22 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
                 </div>
                 
                 <div className="quality-info">
+                  <div className="pdf-type-explanation">
+                    <h5>📋 PDF Format Guide:</h5>
+                    <div className="format-info">
+                      <div className="format-item">
+                        <span className="format-badge text-based">Styled Text PDF</span>
+                        <span className="format-desc">Professional styling with selectable text. Perfect for job applications - maintains visual appeal while ensuring ATS compatibility.</span>
+                      </div>
+                      <div className="format-item">
+                        <span className="format-badge visual">Image Format</span>
+                        <span className="format-desc">Pixel-perfect visual rendering of your resume design. Best for printing, portfolios, and when exact formatting is critical.</span>
+                      </div>
+                    </div>
+                  </div>
+                  
                   <p className="file-size-note">
-                    💡 <strong>Recommended:</strong> Use "Standard Quality" for best balance of clarity and file size
+                    💡 <strong>Recommendation:</strong> Use Styled Text PDF for job applications (best of both worlds), Image Format for printing
                   </p>
                   <p className="file-size-limit">
                     📋 <strong>File Size Limit:</strong> Maximum 2MB for most email systems and job portals

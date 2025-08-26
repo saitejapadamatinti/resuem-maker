@@ -46,6 +46,7 @@ function MainContent({ steps, currentStep, resumeData, onUpdateData, onStepChang
               const updatedSectionNames = { ...resumeData.sectionNames, [key]: value };
               onUpdateData('sectionNames', updatedSectionNames);
             }}
+            resumeData={resumeData}
           />
         );
       case 'experience':

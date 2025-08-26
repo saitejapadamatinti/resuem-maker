@@ -8,6 +8,7 @@ import { applicationData } from './data/applicationData';
 import './App.css';
 import * as pdfjsLib from 'pdfjs-dist';
 import Tesseract from 'tesseract.js';
+import ReactGA from "react-ga4";
 
 // Disable external worker; we'll run without a worker to avoid fetch issues
 try { pdfjsLib.GlobalWorkerOptions.workerSrc = undefined; } catch {}
@@ -16,6 +17,8 @@ const STORAGE_KEY = 'ats-resume-builder:data:v1';
 const STORAGE_STEPS_KEY = 'ats-resume-builder:steps:v1';
 const STORAGE_STEP_INDEX_KEY = 'ats-resume-builder:currentStep:v1';
 
+const TRACKING_ID = "G-G1SHXCNPED"; // Replace with your Measurement ID
+ReactGA.initialize(TRACKING_ID);
 function App() {
   const [currentStep, setCurrentStep] = useState(0);
   const [steps, setSteps] = useState(['usage-guide', 'contact', 'websites', 'summary', 'experience', 'education', 'projects', 'skills', 'preview']);
@@ -43,10 +46,13 @@ function App() {
   });
   const [theme, setTheme] = useState('classic');
 
-  // Debug theme changes
-  useEffect(() => {
+    useEffect(() => {
     console.log('Theme changed to:', theme);
   }, [theme]);
+  
+
+  // Debug theme changes
+
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -423,6 +429,7 @@ function App() {
         onChangeTheme={setTheme}
         onImportResume={importResume}
         onImportPdf={importPdf}
+        authKey="auto" // Options: 'auto', 'always', 'never', 'guest-only', 'user-only'
       />
       <div className="app-layout">
         <Sidebar 
