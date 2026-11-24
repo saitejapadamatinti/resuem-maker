@@ -19,9 +19,11 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
   const [dividerStyle, setDividerStyle] = useState('solid');
   const [showGuides, setShowGuides] = useState(true);
   const [atsFriendly, setAtsFriendly] = useState(true);
+  const [selectedTemplate, setSelectedTemplate] = useState(() => { try { return localStorage.getItem('ats-resume-builder:template') || 'modern'; } catch { return 'modern'; } });
+  const templates = [{id:'modern',name:'Modern Minimal',detail:'Clean typography and subtle accents',tag:'Popular'},{id:'classic-clean',name:'Classic Clean',detail:'Traditional recruiter-friendly layout',tag:'ATS friendly'},{id:'executive',name:'Executive',detail:'Confident headings and refined spacing',tag:'Experienced'},{id:'compact-clean',name:'Compact',detail:'Space-efficient for detailed experience',tag:'One page'},{id:'graduate',name:'First Job',detail:'Education and projects take the lead',tag:'Entry level'},{id:'contemporary',name:'Contemporary',detail:'A polished modern professional look',tag:'Modern'}];
+  useEffect(() => { try { localStorage.setItem('ats-resume-builder:template', selectedTemplate); } catch {} }, [selectedTemplate]);
 
-  // Debug theme
-  console.log('PreviewSection received theme:', theme);
+  // Legacy theme prop retained for backwards compatibility; selectedTemplate controls the layout.
 
   // A4 in points used by jsPDF
   const A4_WIDTH_PT = 595.28;
@@ -1185,23 +1187,23 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
 
   return (
     <section className="section active">
-      <h2>Resume Preview</h2>
-      <p className="section-description">Preview how your resume will appear when downloaded</p>
-      
-      {/* Theme indicator for debugging */}
-      <div style={{ 
-        padding: '8px 16px', 
-        background: '#f0f0f0', 
-        borderRadius: '8px', 
-        marginBottom: '16px',
-        fontSize: '14px',
-        color: '#666'
-      }}>
-        Current Theme: <strong>{theme}</strong>
+      <div className="resume-preview-heading">
+        <div><span className="resume-eyebrow">YOUR DOCUMENT</span><h2>Choose your resume template</h2><p className="section-description">Pick a polished layout and see your resume update instantly.</p></div>
+        <span className="resume-live-pill"><span /> Live preview</span>
       </div>
+      <div className="resume-template-grid" role="list" aria-label="Resume templates">
+        {templates.map((template) => (
+          <button type="button" key={template.id} role="listitem" className={selectedTemplate === template.id ? 'resume-template-card is-selected' : 'resume-template-card'} onClick={() => setSelectedTemplate(template.id)} aria-pressed={selectedTemplate === template.id}>
+            <span className={'template-mini template-mini--' + template.id} aria-hidden="true"><span className="mini-name" /><span className="mini-contact" /><span className="mini-section" /><span className="mini-line" /><span className="mini-line short" /><span className="mini-section second" /><span className="mini-line" /><span className="mini-line medium" /><span className="mini-line" /></span>
+            <span className="template-card-meta"><span className="template-card-title">{template.name}</span><span className="template-card-detail">{template.detail}</span><span className="template-card-tag">{template.tag}</span></span>
+            {selectedTemplate === template.id && <span className="template-selected-mark">✓</span>}
+          </button>
+        ))}
+      </div>
+      <div className="resume-preview-toolbar"><strong>{templates.find(item => item.id === selectedTemplate)?.name}</strong><span>A4 page · Editable live preview · ATS-conscious</span></div>
       
       <div 
-        className={`resume-preview ${atsFriendly ? 'ats-friendly' : ''} theme-${theme}`}
+        className={`resume-preview ${atsFriendly ? 'ats-friendly' : ''} layout-${selectedTemplate}`}
         style={{ 
           position: 'relative',
           ['--resume-font-family']: fontFamily,
@@ -1218,7 +1220,7 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
       >
         <div className="resume-header">
           <h1>{resumeData.contact.fullName || 'Your Name'}</h1>
-          {theme === 'reference' && resumeData.contact.headline && <div className="reference-headline">{resumeData.contact.headline}</div>}
+          {resumeData.contact.headline && <div className="reference-headline">{resumeData.contact.headline}</div>}
           <div className="contact-info">
             {resumeData.contact.phone && <span>{resumeData.contact.phone}</span>}
             {resumeData.contact.email && (
