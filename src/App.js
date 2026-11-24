@@ -444,7 +444,7 @@ function App() {
       setCurrentStep(0);
     } catch (e) {
       console.error('PDF import failed:', e);
-      const detail = String(e?.message || textExtractionError?.message || '').toLowerCase();
+      const detail = String(e?.message || '').toLowerCase();
       if (detail.includes('password') || detail.includes('encrypted')) {
         alert('This PDF is password-protected. Remove the password and try importing it again.');
       } else if (detail.includes('worker') || detail.includes('fake worker')) {
