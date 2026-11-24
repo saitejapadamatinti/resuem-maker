@@ -77,6 +77,23 @@ function ATSOptimizationGuide({ resumeData = {}, targetJobDescription = '', onUp
     catch { alert('Clipboard access is unavailable. Select and copy the text manually.'); }
   };
 
+  const copyImportedText = async () => {
+    if (!resumeData.importedText) return;
+    try { await navigator.clipboard.writeText(resumeData.importedText); alert('Extracted text copied.'); }
+    catch { alert('Clipboard access is unavailable. Select and copy the text manually.'); }
+  };
+
+  const downloadImportedText = () => {
+    if (!resumeData.importedText) return;
+    const blob = new Blob([resumeData.importedText], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = 'extracted-resume-text.txt';
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
+
   const downloadCoverLetter = () => {
     const draft = resumeData.coverLetterDraft || '';
     if (!draft) return;
@@ -107,6 +124,7 @@ function ATSOptimizationGuide({ resumeData = {}, targetJobDescription = '', onUp
         <button type="button" className={activeTab === 'match' ? 'tab-button active' : 'tab-button'} onClick={() => setActiveTab('match')}>Job match</button>
         <button type="button" className={activeTab === 'checklist' ? 'tab-button active' : 'tab-button'} onClick={() => setActiveTab('checklist')}>Resume checklist</button>
         <button type="button" className={activeTab === 'cover-letter' ? 'tab-button active' : 'tab-button'} onClick={() => setActiveTab('cover-letter')}>Cover letter</button>
+        {resumeData.importedText && <button type="button" className={activeTab === 'pdf-text' ? 'tab-button active' : 'tab-button'} onClick={() => setActiveTab('pdf-text')}>PDF text review</button>}
       </div>
 
       {activeTab === 'match' && (
@@ -123,6 +141,16 @@ function ATSOptimizationGuide({ resumeData = {}, targetJobDescription = '', onUp
               <p className="ats-disclaimer">Add a missing term only when it truthfully reflects your skills or experience. Similar wording may also be recognized by hiring systems.</p>
             </div>
           ) : <div className="empty-state">Add a job description to see keyword overlap and missing terms.</div>}
+        </div>
+      )}
+
+      {activeTab === 'pdf-text' && (
+        <div className="ats-guide-content">
+          <h3>Extracted PDF text</h3>
+          <p className="section-description">PDF parsing and OCR can misread columns, dates or headings. Review this original extraction against the parsed fields before deleting it.</p>
+          <div className="cover-letter-actions"><button type="button" className="btn btn--outline" onClick={copyImportedText}>Copy extracted text</button><button type="button" className="btn btn--outline" onClick={downloadImportedText}>Download .txt</button><button type="button" className="btn btn--outline" onClick={() => onUpdateResumeField('importedText', '')}>Clear extracted text</button></div>
+          <label className="form-label" htmlFor="pdf-extracted-text">Extracted content</label>
+          <textarea id="pdf-extracted-text" className="form-control job-description-input" rows="18" value={resumeData.importedText} onChange={event => onUpdateResumeField('importedText', event.target.value)} />
         </div>
       )}
 
