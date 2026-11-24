@@ -1,13 +1,15 @@
 import React, { useRef, useState, useEffect } from 'react';
 import AuthModal from './AuthModal';
+import CloudResumeManager from './CloudResumeManager';
 import { authHelpers } from '../lib/supabase';
 
-function Header({ theme = 'classic', onChangeTheme, onImportResume, onImportPdf, authKey = 'auto' }) {
+function Header({ theme = 'classic', onChangeTheme, onImportResume, onImportPdf, currentResumeData, onLoadResume, authKey = 'auto' }) {
   const fileInputRef = useRef(null);
   
   // Authentication state
   const [user, setUser] = useState(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isCloudManagerOpen, setIsCloudManagerOpen] = useState(false);
   const [authMode, setAuthMode] = useState('signin'); // 'signin' or 'signup'
   const [authLoading, setAuthLoading] = useState(true);
   
@@ -123,6 +125,13 @@ function Header({ theme = 'classic', onChangeTheme, onImportResume, onImportPdf,
                       <div className="user-email">{user.email}</div>
                     </div>
                   </div>
+                  <button
+                    className="btn btn--outline btn--sm"
+                    onClick={() => setIsCloudManagerOpen(true)}
+                    title="Manage cloud resumes"
+                  >
+                    ☁️ Cloud Resumes
+                  </button>
                   <button 
                     className="btn btn--outline btn--sm sign-out-btn"
                     onClick={handleSignOut}
@@ -175,6 +184,12 @@ function Header({ theme = 'classic', onChangeTheme, onImportResume, onImportPdf,
       </div>
       
       {/* Authentication Modal */}
+      <CloudResumeManager
+        isOpen={isCloudManagerOpen}
+        onClose={() => setIsCloudManagerOpen(false)}
+        currentResumeData={currentResumeData || {}}
+        onLoadResume={onLoadResume}
+      />
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
