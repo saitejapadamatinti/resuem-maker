@@ -17,15 +17,12 @@ const STORAGE_KEY = 'ats-resume-builder:data:v1';
 const STORAGE_STEPS_KEY = 'ats-resume-builder:steps:v1';
 const STORAGE_STEP_INDEX_KEY = 'ats-resume-builder:currentStep:v1';
 
-const TRACKING_ID = "G-G1SHXCNPED"; // Replace with your Measurement ID
-ReactGA.initialize(TRACKING_ID);
+const TRACKING_ID = process.env.REACT_APP_GA_MEASUREMENT_ID;
+if (TRACKING_ID) ReactGA.initialize(TRACKING_ID);
 function App() {
   const [currentStep, setCurrentStep] = useState(0);
-  const [steps, setSteps] = useState(['usage-guide', 'contact', 'websites', 'summary', 'experience', 'education', 'projects', 'skills', 'preview']);
+  const [steps, setSteps] = useState(['usage-guide', 'contact', 'websites', 'summary', 'experience', 'education', 'projects', 'skills', 'ats-guide', 'preview']);
   
-  // Debug logging
-  console.log('Current steps:', steps);
-  console.log('Current step index:', currentStep);
   const [resumeData, setResumeData] = useState({
     contact: {},
     websites: [],
@@ -35,6 +32,11 @@ function App() {
     projects: [],
     customSections: [],
     skills: { technical: [], soft: [], other: [] },
+    targetJobDescription: '',
+    coverLetterDraft: '',
+    coverLetterCompany: '',
+    coverLetterRole: '',
+    importedText: '',
     sectionNames: {
       summary: 'Professional Summary',
       experience: 'Work Experience',
@@ -46,12 +48,6 @@ function App() {
   });
   const [theme, setTheme] = useState('classic');
 
-    useEffect(() => {
-    console.log('Theme changed to:', theme);
-  }, [theme]);
-  
-
-  // Debug theme changes
 
 
   // Load from localStorage on mount
@@ -62,29 +58,38 @@ function App() {
         const parsed = JSON.parse(raw);
         if (parsed && typeof parsed === 'object') setResumeData(parsed);
       }
+
+      let storedSteps = null;
+      let restoredSteps = null;
       const rawSteps = localStorage.getItem(STORAGE_STEPS_KEY);
       if (rawSteps) {
-        const parsedSteps = JSON.parse(rawSteps);
-        if (Array.isArray(parsedSteps) && parsedSteps.length) {
-          // Ensure usage-guide is always the first step
-          const updatedSteps = ['usage-guide'];
-          parsedSteps.forEach(step => {
-            if (step !== 'usage-guide') {
-              updatedSteps.push(step);
-            }
+        storedSteps = JSON.parse(rawSteps);
+        if (Array.isArray(storedSteps) && storedSteps.length) {
+          // Upgrade older saved navigation while retaining the user's section order.
+          restoredSteps = ['usage-guide'];
+          storedSteps.forEach(step => {
+            if (step !== 'usage-guide' && step !== 'ats-guide') restoredSteps.push(step);
           });
-          setSteps(updatedSteps);
+          if (!restoredSteps.includes('ats-guide')) {
+            const skillsIndex = restoredSteps.indexOf('skills');
+            restoredSteps.splice(skillsIndex >= 0 ? skillsIndex + 1 : restoredSteps.length - 1, 0, 'ats-guide');
+          }
+          if (!restoredSteps.includes('preview')) restoredSteps.push('preview');
+          setSteps(restoredSteps);
         }
       }
+
       const rawIndex = localStorage.getItem(STORAGE_STEP_INDEX_KEY);
       if (rawIndex !== null) {
         const idx = Number(rawIndex);
-        setCurrentStep(Number.isNaN(idx) ? 0 : Math.max(0, idx));
+        const oldStepKey = Array.isArray(storedSteps) ? storedSteps[idx] : null;
+        const mappedIndex = oldStepKey && restoredSteps ? restoredSteps.indexOf(oldStepKey) : idx;
+        setCurrentStep(Number.isFinite(mappedIndex) ? Math.max(0, Math.min(mappedIndex, (restoredSteps || steps).length - 1)) : 0);
       }
     } catch {}
   }, []);
 
-  // Autosave on changes (debounced by microtask via setTimeout)
+  // Debounced local autosave
   useEffect(() => {
     const t = setTimeout(() => {
       try {
@@ -93,14 +98,13 @@ function App() {
         localStorage.setItem(STORAGE_STEP_INDEX_KEY, String(currentStep));
         localStorage.setItem('ats-resume-builder:theme', theme);
       } catch {}
-    }, 0);
+    }, 350);
     return () => clearTimeout(t);
   }, [resumeData, steps, currentStep, theme]);
 
   useEffect(() => {
     try {
       const savedTheme = localStorage.getItem('ats-resume-builder:theme');
-      console.log('Loading theme from localStorage:', savedTheme);
       if (savedTheme) setTheme(savedTheme);
     } catch {}
   }, []);
@@ -112,13 +116,10 @@ function App() {
   };
 
   const reorderSteps = (newSteps) => {
-    console.log('reorderSteps called with:', newSteps);
-    console.log('Current steps before reorder:', steps);
     const currentKey = steps[currentStep];
     setSteps(newSteps);
     const newIndex = newSteps.indexOf(currentKey);
     setCurrentStep(newIndex >= 0 ? newIndex : 0);
-    console.log('Steps reordered successfully');
   };
 
   const updateResumeData = (section, data) => {
@@ -142,6 +143,12 @@ function App() {
       education: sample.education || [],
       projects: sample.projects || [],
       skills: sample.skills || { technical: [], soft: [], other: [] },
+      customSections: sample.customSections || [],
+      targetJobDescription: '',
+      coverLetterDraft: '',
+      coverLetterCompany: '',
+      coverLetterRole: '',
+      importedText: '',
       sectionNames: {
         summary: 'Professional Summary',
         experience: 'Work Experience',
@@ -179,6 +186,12 @@ function App() {
       experience: [], 
       education: [], 
       projects: [], 
+      customSections: [],
+      targetJobDescription: '',
+      coverLetterDraft: '',
+      coverLetterCompany: '',
+      coverLetterRole: '',
+      importedText: '',
       skills: { technical: [], soft: [], other: [] },
       sectionNames: {
         summary: 'Professional Summary',
@@ -189,7 +202,7 @@ function App() {
         websites: 'Websites & Links'
       }
     });
-    setSteps(['usage-guide', 'contact', 'websites', 'summary', 'experience', 'education', 'projects', 'skills', 'preview']);
+    setSteps(['usage-guide', 'contact', 'websites', 'summary', 'experience', 'education', 'projects', 'skills', 'ats-guide', 'preview']);
     setCurrentStep(0);
   };
 
@@ -199,6 +212,7 @@ function App() {
         resumeData,
         steps,
         currentStep,
+        schemaVersion: 2,
         exportedAt: new Date().toISOString()
       };
       const json = JSON.stringify(payload, null, 2);
@@ -241,6 +255,12 @@ function App() {
       })) : []),
       education: Array.isArray(source.education) ? source.education : (Array.isArray(source.educationHistory) ? source.educationHistory : (Array.isArray(source.education) ? source.education : [])),
       projects: Array.isArray(source.projects) ? source.projects : [],
+      targetJobDescription: source.targetJobDescription || '',
+      coverLetterDraft: source.coverLetterDraft || '',
+      coverLetterCompany: source.coverLetterCompany || '',
+      coverLetterRole: source.coverLetterRole || '',
+      importedText: source.importedText || '',
+      customSections: Array.isArray(source.customSections) ? source.customSections : [],
       skills: (() => {
         if (source.skills && (Array.isArray(source.skills.technical) || Array.isArray(source.skills.soft) || Array.isArray(source.skills.other))) {
           return source.skills;
@@ -277,7 +297,7 @@ function App() {
     setResumeData(normalized);
     setCurrentStep(0);
     if (Array.isArray(json.steps)) {
-      const valid = json.steps.filter(k => ['usage-guide','contact','websites','summary','experience','education','projects','skills','preview'].includes(k));
+      const valid = json.steps.filter(k => ['usage-guide','contact','websites','summary','experience','education','projects','skills','ats-guide','preview'].includes(k));
       if (valid.length) {
         // Ensure usage-guide is always the first step
         const updatedSteps = ['usage-guide'];
@@ -286,6 +306,8 @@ function App() {
             updatedSteps.push(step);
           }
         });
+        if (!updatedSteps.includes('ats-guide')) updatedSteps.splice(Math.max(updatedSteps.indexOf('skills') + 1, 1), 0, 'ats-guide');
+        if (!updatedSteps.includes('preview')) updatedSteps.push('preview');
         setSteps(updatedSteps);
       }
     }
@@ -391,6 +413,9 @@ function App() {
         education: sections.education,
         projects: sections.projects,
         skills: sections.skills,
+        customSections: [],
+        targetJobDescription: '',
+        importedText: text,
         sectionNames: {
           summary: 'Professional Summary',
           experience: 'Work Experience',
@@ -429,6 +454,8 @@ function App() {
         onChangeTheme={setTheme}
         onImportResume={importResume}
         onImportPdf={importPdf}
+        currentResumeData={resumeData}
+        onLoadResume={(data) => importResume({ resumeData: data })}
         authKey="auto" // Options: 'auto', 'always', 'never', 'guest-only', 'user-only'
       />
       <div className="app-layout">
@@ -463,7 +490,7 @@ function App() {
         />
       </div>
       <div style={{ display: 'none' }} data-theme={theme} />
-      <div className='large-screen-message'>Please Open Laptop or Desktop</div>
+      
       <Footer />
     </div>
   );

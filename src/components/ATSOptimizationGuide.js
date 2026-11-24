@@ -1,250 +1,181 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
-function ATSOptimizationGuide({ resumeData, onNavigateToSection }) {
-  const [activeTab, setActiveTab] = useState('keywords');
+const STOP_WORDS = new Set(['the','and','for','with','you','your','our','are','this','that','will','from','have','has','who','what','their','they','them','into','our','about','years','year','work','role','team','ability','strong','good','excellent','experience','looking','required','preferred','using','use','skills','skill']);
 
-  const missingContactFields = [];
-  if (!resumeData.contact?.phone) missingContactFields.push('Phone number');
-  if (!resumeData.contact?.email) missingContactFields.push('Email address');
-  if (!resumeData.contact?.location) missingContactFields.push('City, State');
-  if (!resumeData.contact?.linkedIn) missingContactFields.push('LinkedIn URL');
+function tokenize(value = '') {
+  return (value.toLowerCase().match(/[a-z][a-z0-9+#.-]{1,}/g) || [])
+    .filter(word => !STOP_WORDS.has(word));
+}
 
-  const missingSections = [];
-  if (!resumeData.experience?.length) missingSections.push('Work Experience');
-  if (!resumeData.education?.length) missingSections.push('Education');
-  if (!resumeData.skills?.technical?.length && !resumeData.skills?.soft?.length) missingSections.push('Skills');
+function ATSOptimizationGuide({ resumeData = {}, targetJobDescription = '', onUpdateJobDescription = () => {}, onUpdateResumeField = () => {}, onNavigateToSection = () => {} }) {
+  const [jobDescription, setJobDescription] = useState(targetJobDescription);
+  useEffect(() => setJobDescription(targetJobDescription || ''), [targetJobDescription]);
+  const [activeTab, setActiveTab] = useState('match');
+  const [showAll, setShowAll] = useState(false);
 
-  const keywordSuggestions = {
-    hardSkills: [
-      'Frontend Development',
-      'Responsive Web Design',
-      'Back-End Web Development',
-      'Web Development',
-      'Software Development principles',
-      'JavaScript',
-      'React',
-      'HTML/CSS',
-      'Modern Web Technologies',
-      'User Interface Components',
-      'Optimizing Applications',
-      'Maximum Speed',
-      'Scalability',
-      'Technical Feasibility'
-    ],
-    softSkills: [
-      'Problem-solving skills',
-      'Attention to detail',
-      'Ability to work independently',
-      'Remote work capability',
-      'Collaboration',
-      'Communication',
-      'Leadership',
-      'Time management',
-      'Analytical thinking',
-      'Adaptability'
-    ],
-    otherKeywords: [
-      'User interface components',
-      'Modern web technologies',
-      'Collaborating with designers',
-      'Collaborating with backend developers',
-      'Creating responsive web designs',
-      'Optimizing applications',
-      'UI/UX designs',
-      'Healthcare industry experience',
-      'Cross-functional collaboration',
-      'Technical feasibility assessment'
-    ]
+  const resumeText = useMemo(() => {
+    const parts = [
+      resumeData.contact?.fullName, resumeData.contact?.email, resumeData.contact?.phone,
+      resumeData.contact?.location, resumeData.contact?.headline, resumeData.contact?.website, resumeData.summary,
+      ...(resumeData.experience || []).flatMap(item => [item.title, item.company, item.location, ...(item.achievements || [])]),
+      ...(resumeData.education || []).flatMap(item => [item.degree, item.school, item.location]),
+      ...(resumeData.projects || []).flatMap(item => [item.name, item.role, item.description]),
+      ...Object.values(resumeData.skills || {}).flat()
+    ];
+    return parts.filter(Boolean).join(' ').replace(/<[^>]*>/g, ' ').toLowerCase();
+  }, [resumeData]);
+
+  const analysis = useMemo(() => {
+    const terms = [...new Set(tokenize(jobDescription))];
+    const resumeTokens = new Set(tokenize(resumeText));
+    const matched = terms.filter(term => resumeTokens.has(term));
+    const missing = terms.filter(term => !resumeTokens.has(term));
+    const score = terms.length ? Math.round((matched.length / terms.length) * 100) : 0;
+    return { terms, matched, missing, score };
+  }, [jobDescription, resumeText]);
+
+  const checks = [
+    { label: 'Full name', ok: Boolean(resumeData.contact?.fullName?.trim()), section: 'contact' },
+    { label: 'Professional email', ok: Boolean(resumeData.contact?.email?.trim()), section: 'contact' },
+    { label: 'Phone number', ok: Boolean(resumeData.contact?.phone?.trim()), section: 'contact' },
+    { label: 'Professional summary', ok: Boolean(resumeData.summary?.replace(/<[^>]*>/g, '').trim()), section: 'summary' },
+    { label: 'Work experience', ok: Boolean(resumeData.experience?.length), section: 'experience' },
+    { label: 'Education', ok: Boolean(resumeData.education?.length), section: 'education' },
+    { label: 'Skills', ok: Boolean(Object.values(resumeData.skills || {}).some(items => items?.length)), section: 'skills' },
+    { label: 'Projects', ok: Boolean(resumeData.projects?.length), section: 'projects' }
+  ];
+  const complete = checks.filter(check => check.ok).length;
+  const readiness = Math.round((complete / checks.length) * 100);
+  const visibleMissing = showAll ? analysis.missing : analysis.missing.slice(0, 24);
+
+  const generateCoverLetter = () => {
+    const plainSummary = (resumeData.summary || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+    const role = resumeData.coverLetterRole || resumeData.contact?.headline || 'the advertised position';
+    const company = resumeData.coverLetterCompany || 'your organization';
+    const experience = (resumeData.experience || []).find(item => item.title || item.company);
+    const skills = [...(resumeData.skills?.technical || []), ...(resumeData.skills?.other || [])].filter(Boolean).slice(0, 7);
+    const highlights = experience?.achievements?.filter(Boolean).slice(0, 2) || [];
+    const paragraphs = [
+      'Dear Hiring Team,',
+      '',
+      `I am writing to express my interest in the ${role} opportunity at ${company}. I would welcome the opportunity to contribute my experience and continue growing with your team.`
+    ];
+    if (plainSummary) paragraphs.push('', plainSummary);
+    if (experience) {
+      paragraphs.push('', `In my role as ${experience.title || 'a professional'}${experience.company ? ` at ${experience.company}` : ''}, I have developed practical experience relevant to this opportunity.`);
+      highlights.forEach(item => paragraphs.push(`• ${item}`));
+    }
+    if (skills.length) paragraphs.push('', `My relevant skills include ${skills.join(', ')}.`);
+    paragraphs.push('', 'I would appreciate the opportunity to discuss how my background aligns with your needs. Thank you for your time and consideration.', '', `Sincerely,\n${resumeData.contact?.fullName || '[Your name]'}`);
+    onUpdateResumeField('coverLetterDraft', paragraphs.join('\n'));
   };
 
-  const renderKeywordsTab = () => (
-    <div className="ats-guide-content">
-      <h3>Missing Keywords by Category</h3>
-      
-      <div className="keyword-category">
-        <h4 className="high-impact">🔴 Hard Skills (High Impact - 0%)</h4>
-        <p>Add these technical skills to your Skills section:</p>
-        <div className="keyword-grid">
-          {keywordSuggestions.hardSkills.map((skill, index) => (
-            <span key={index} className="keyword-tag technical">{skill}</span>
-          ))}
-        </div>
-      </div>
+  const copyCoverLetter = async () => {
+    const draft = resumeData.coverLetterDraft || '';
+    if (!draft) return;
+    try { await navigator.clipboard.writeText(draft); alert('Cover letter copied.'); }
+    catch { alert('Clipboard access is unavailable. Select and copy the text manually.'); }
+  };
 
-      <div className="keyword-category">
-        <h4 className="low-impact">🟡 Soft Skills (Low Impact - 0%)</h4>
-        <p>Include these in your Skills section and experience descriptions:</p>
-        <div className="keyword-grid">
-          {keywordSuggestions.softSkills.map((skill, index) => (
-            <span key={index} className="keyword-tag soft">{skill}</span>
-          ))}
-        </div>
-      </div>
+  const copyImportedText = async () => {
+    if (!resumeData.importedText) return;
+    try { await navigator.clipboard.writeText(resumeData.importedText); alert('Extracted text copied.'); }
+    catch { alert('Clipboard access is unavailable. Select and copy the text manually.'); }
+  };
 
-      <div className="keyword-category">
-        <h4 className="medium-impact">🟠 Other Keywords (Medium Impact - 0%)</h4>
-        <p>Incorporate these phrases in your experience descriptions:</p>
-        <div className="keyword-grid">
-          {keywordSuggestions.otherKeywords.map((keyword, index) => (
-            <span key={index} className="keyword-tag other">{keyword}</span>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
+  const downloadImportedText = () => {
+    if (!resumeData.importedText) return;
+    const blob = new Blob([resumeData.importedText], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = 'extracted-resume-text.txt';
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
 
-  const renderSectionsTab = () => (
-    <div className="ats-guide-content">
-      <h3>Missing Resume Sections</h3>
-      
-      {missingContactFields.length > 0 && (
-        <div className="missing-section">
-          <h4>📞 Contact Details</h4>
-          <p>Missing: {missingContactFields.join(', ')}</p>
-          <button 
-            className="guide-button"
-            onClick={() => onNavigateToSection('contact')}
-          >
-            Complete Contact Info
-          </button>
-        </div>
-      )}
-
-      {missingSections.includes('Work Experience') && (
-        <div className="missing-section">
-          <h4>💼 Work Experience</h4>
-          <p>Add your work history with quantifiable achievements</p>
-          <button 
-            className="guide-button"
-            onClick={() => onNavigateToSection('experience')}
-          >
-            Add Experience
-          </button>
-        </div>
-      )}
-
-      {missingSections.includes('Education') && (
-        <div className="missing-section">
-          <h4>🎓 Education</h4>
-          <p>Include degree in Computer Science or Information Technology</p>
-          <button 
-            className="guide-button"
-            onClick={() => onNavigateToSection('education')}
-          >
-            Add Education
-          </button>
-        </div>
-      )}
-
-      {missingSections.includes('Skills') && (
-        <div className="missing-section">
-          <h4>🛠️ Skills</h4>
-          <p>Add technical and soft skills relevant to the job</p>
-          <button 
-            className="guide-button"
-            onClick={() => onNavigateToSection('skills')}
-          >
-            Add Skills
-          </button>
-        </div>
-      )}
-    </div>
-  );
-
-  const renderOptimizationTab = () => (
-    <div className="ats-guide-content">
-      <h3>ATS Optimization Steps</h3>
-      
-      <div className="optimization-steps">
-        <div className="step">
-          <div className="step-number">1</div>
-          <div className="step-content">
-            <h4>Complete All Sections</h4>
-            <p>Fill out Contact, Experience, Education, and Skills sections with real data</p>
-          </div>
-        </div>
-
-        <div className="step">
-          <div className="step-number">2</div>
-          <div className="step-content">
-            <h4>Add Target Job Description</h4>
-            <p>Go to Summary section and paste the job description you're applying for</p>
-          </div>
-        </div>
-
-        <div className="step">
-          <div className="step-number">3</div>
-          <div className="step-content">
-            <h4>Generate ATS Summary</h4>
-            <p>Use the ATS Summary Generator to create optimized summaries</p>
-          </div>
-        </div>
-
-        <div className="step">
-          <div className="step-number">4</div>
-          <div className="step-content">
-            <h4>Include Quantifiable Achievements</h4>
-            <p>Add numbers, percentages, and dollar amounts to your experience</p>
-          </div>
-        </div>
-
-        <div className="step">
-          <div className="step-number">5</div>
-          <div className="step-content">
-            <h4>Match Job Title</h4>
-            <p>Ensure your target job title appears in your experience or summary</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="ats-tips">
-        <h4>Pro Tips for 90+ ATS Score:</h4>
-        <ul>
-          <li>Use exact keywords from the job description</li>
-          <li>Include industry-specific terminology</li>
-          <li>Add measurable achievements (increased X by Y%)</li>
-          <li>Match the job title in your experience or summary</li>
-          <li>Include relevant technical certifications</li>
-          <li>Use standard section headings (Experience, Education, Skills)</li>
-        </ul>
-      </div>
-    </div>
-  );
+  const downloadCoverLetter = () => {
+    const draft = resumeData.coverLetterDraft || '';
+    if (!draft) return;
+    const blob = new Blob([draft], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = 'cover-letter.txt';
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
-    <div className="ats-optimization-guide">
+    <section className="section active ats-optimization-guide">
       <div className="guide-header">
-        <h2>🎯 ATS Optimization Guide</h2>
-        <p>Complete guide to improve your ATS score from 0% to 90+</p>
+        <p className="eyebrow">RESUME INTELLIGENCE</p>
+        <h2>ATS & Job Match Studio</h2>
+        <p className="section-description">Check resume completeness and compare its wording with a specific job description. This is a guidance estimate, not a guarantee of ATS results.</p>
       </div>
 
-      <div className="guide-tabs">
-        <button 
-          className={`tab-button ${activeTab === 'keywords' ? 'active' : ''}`}
-          onClick={() => setActiveTab('keywords')}
-        >
-          Missing Keywords
-        </button>
-        <button 
-          className={`tab-button ${activeTab === 'sections' ? 'active' : ''}`}
-          onClick={() => setActiveTab('sections')}
-        >
-          Missing Sections
-        </button>
-        <button 
-          className={`tab-button ${activeTab === 'optimization' ? 'active' : ''}`}
-          onClick={() => setActiveTab('optimization')}
-        >
-          Optimization Steps
-        </button>
+      <div className="ats-studio-summary">
+        <div className="ats-studio-score"><strong>{readiness}%</strong><span>Resume completeness</span></div>
+        <div className="ats-studio-progress"><div style={{ width: readiness + '%' }} /></div>
+        <span>{complete} of {checks.length} core sections covered</span>
       </div>
 
-      <div className="guide-content">
-        {activeTab === 'keywords' && renderKeywordsTab()}
-        {activeTab === 'sections' && renderSectionsTab()}
-        {activeTab === 'optimization' && renderOptimizationTab()}
+      <div className="guide-tabs" role="tablist" aria-label="ATS tools">
+        <button type="button" className={activeTab === 'match' ? 'tab-button active' : 'tab-button'} onClick={() => setActiveTab('match')}>Job match</button>
+        <button type="button" className={activeTab === 'checklist' ? 'tab-button active' : 'tab-button'} onClick={() => setActiveTab('checklist')}>Resume checklist</button>
+        <button type="button" className={activeTab === 'cover-letter' ? 'tab-button active' : 'tab-button'} onClick={() => setActiveTab('cover-letter')}>Cover letter</button>
+        {resumeData.importedText && <button type="button" className={activeTab === 'pdf-text' ? 'tab-button active' : 'tab-button'} onClick={() => setActiveTab('pdf-text')}>PDF text review</button>}
       </div>
-    </div>
+
+      {activeTab === 'match' && (
+        <div className="ats-guide-content">
+          <label className="form-label" htmlFor="job-description-match">Paste the target job description</label>
+          <textarea id="job-description-match" className="form-control job-description-input" rows="9" value={jobDescription} onChange={event => { setJobDescription(event.target.value); onUpdateJobDescription(event.target.value); }} placeholder="Paste the complete job description here. Include responsibilities, qualifications and required technologies." />
+          {jobDescription.trim() ? (
+            <div className="job-match-results">
+              <div className="job-match-score"><strong>{analysis.score}%</strong><span>Keyword overlap</span></div>
+              <div className="keyword-match-columns">
+                <div><h4>Found in your resume ({analysis.matched.length})</h4><div className="keyword-grid">{analysis.matched.slice(0, 36).map(word => <span className="keyword-tag technical" key={word}>{word}</span>)}</div></div>
+                <div><h4>Not found ({analysis.missing.length})</h4><div className="keyword-grid">{visibleMissing.map(word => <span className="keyword-tag missing" key={word}>{word}</span>)}</div>{analysis.missing.length > 24 && <button type="button" className="btn btn--outline btn--sm" onClick={() => setShowAll(value => !value)}>{showAll ? 'Show fewer' : 'Show all keywords'}</button>}</div>
+              </div>
+              <p className="ats-disclaimer">Add a missing term only when it truthfully reflects your skills or experience. Similar wording may also be recognized by hiring systems.</p>
+            </div>
+          ) : <div className="empty-state">Add a job description to see keyword overlap and missing terms.</div>}
+        </div>
+      )}
+
+      {activeTab === 'pdf-text' && (
+        <div className="ats-guide-content">
+          <h3>Extracted PDF text</h3>
+          <p className="section-description">PDF parsing and OCR can misread columns, dates or headings. Review this original extraction against the parsed fields before deleting it.</p>
+          <div className="cover-letter-actions"><button type="button" className="btn btn--outline" onClick={copyImportedText}>Copy extracted text</button><button type="button" className="btn btn--outline" onClick={downloadImportedText}>Download .txt</button><button type="button" className="btn btn--outline" onClick={() => onUpdateResumeField('importedText', '')}>Clear extracted text</button></div>
+          <label className="form-label" htmlFor="pdf-extracted-text">Extracted content</label>
+          <textarea id="pdf-extracted-text" className="form-control job-description-input" rows="18" value={resumeData.importedText} onChange={event => onUpdateResumeField('importedText', event.target.value)} />
+        </div>
+      )}
+
+      {activeTab === 'cover-letter' && (
+        <div className="ats-guide-content cover-letter-builder">
+          <h3>Cover Letter Builder</h3>
+          <p className="section-description">Create a first draft using only information already present in your resume. Review every sentence and tailor it to the specific job before sending.</p>
+          <div className="form-grid">
+            <div className="form-group"><label className="form-label" htmlFor="cover-company">Company name</label><input id="cover-company" className="form-control" value={resumeData.coverLetterCompany || ''} onChange={event => onUpdateResumeField('coverLetterCompany', event.target.value)} placeholder="Company name" /></div>
+            <div className="form-group"><label className="form-label" htmlFor="cover-role">Target role</label><input id="cover-role" className="form-control" value={resumeData.coverLetterRole || ''} onChange={event => onUpdateResumeField('coverLetterRole', event.target.value)} placeholder="Frontend Developer" /></div>
+          </div>
+          <div className="cover-letter-actions"><button type="button" className="btn btn--primary" onClick={generateCoverLetter}>Generate first draft</button><button type="button" className="btn btn--outline" onClick={copyCoverLetter} disabled={!resumeData.coverLetterDraft}>Copy</button><button type="button" className="btn btn--outline" onClick={downloadCoverLetter} disabled={!resumeData.coverLetterDraft}>Download .txt</button></div>
+          <label className="form-label" htmlFor="cover-letter-draft">Edit your cover letter</label>
+          <textarea id="cover-letter-draft" className="form-control job-description-input" rows="16" value={resumeData.coverLetterDraft || ''} onChange={event => onUpdateResumeField('coverLetterDraft', event.target.value)} placeholder="Generate a draft, then personalize it here." />
+          <p className="ats-disclaimer">The generated text is a starting point, not an AI-verified application. Confirm all claims, company details and role requirements yourself.</p>
+        </div>
+      )}
+
+      {activeTab === 'checklist' && (
+        <div className="ats-checklist">
+          {checks.map(check => <button type="button" className="ats-check-item" key={check.label} onClick={() => onNavigateToSection(check.section)}><span className={check.ok ? 'check-status complete' : 'check-status'}>{check.ok ? '✓' : '○'}</span><span>{check.label}</span><span className="check-action">{check.ok ? 'Review' : 'Complete'} →</span></button>)}
+          <p className="ats-disclaimer">A complete resume is not automatically an effective resume. Prioritize relevant evidence, clear formatting and truthful, measurable achievements.</p>
+        </div>
+      )}
+    </section>
   );
 }
 

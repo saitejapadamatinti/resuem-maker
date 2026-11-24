@@ -9,6 +9,7 @@ import ProjectsSection from './sections/ProjectsSection';
 import CustomSectionsSection from './sections/CustomSectionsSection';
 import SkillsSection from './sections/SkillsSection';
 import PreviewSection from './sections/PreviewSection';
+import ATSOptimizationGuide from './ATSOptimizationGuide';
 import SectionNavigation from './SectionNavigation';
 
 function MainContent({ steps, currentStep, resumeData, onUpdateData, onStepChange, onExportJson, theme }) {
@@ -101,6 +102,19 @@ function MainContent({ steps, currentStep, resumeData, onUpdateData, onStepChang
             onUpdateSectionNames={(key, value) => {
               const updatedSectionNames = { ...resumeData.sectionNames, [key]: value };
               onUpdateData('sectionNames', updatedSectionNames);
+            }}
+          />
+        );
+      case 'ats-guide':
+        return (
+          <ATSOptimizationGuide
+            resumeData={resumeData}
+            targetJobDescription={resumeData.targetJobDescription || ''}
+            onUpdateJobDescription={(value) => onUpdateData('targetJobDescription', value)}
+            onUpdateResumeField={(field, value) => onUpdateData(field, value)}
+            onNavigateToSection={(key) => {
+              const index = steps.indexOf(key);
+              if (index >= 0) onStepChange(index);
             }}
           />
         );

@@ -1,79 +1,28 @@
 import React from 'react';
 
-function ContactSection({ data, onUpdate }) {
-  const handleInputChange = (field, value) => {
-    onUpdate({
-      ...data,
-      [field]: value
-    });
-  };
+function ContactSection({ data = {}, onUpdate }) {
+  const handleInputChange = (field, value) => onUpdate({ ...data, [field]: value });
+  const fields = [
+    { name: 'fullName', label: 'Full name', type: 'text', required: true, placeholder: 'e.g. Alex Morgan', span: 'span-2' },
+    { name: 'email', label: 'Email address', type: 'email', required: true, placeholder: 'alex@email.com' },
+    { name: 'phone', label: 'Phone number', type: 'tel', required: true, placeholder: '+91 98765 43210' },
+    { name: 'location', label: 'City, State, Country', type: 'text', placeholder: 'Hyderabad, Telangana, India', span: 'span-2' },
+    { name: 'linkedIn', label: 'LinkedIn URL', type: 'url', placeholder: 'https://linkedin.com/in/yourprofile', span: 'span-2' },
+    { name: 'website', label: 'Portfolio / Website', type: 'url', placeholder: 'https://yourportfolio.com', span: 'span-2' },
+    { name: 'headline', label: 'Target job title', type: 'text', placeholder: 'Frontend Developer', span: 'span-2' }
+  ];
 
   return (
     <section className="section active">
+      <p className="eyebrow">STEP 01 · YOUR PROFILE</p>
       <h2>Contact Information</h2>
-      <p className="section-description">Enter your basic contact details</p>
-      
-      <form className="form-grid">
-        <div className="form-group">
-          <label className="form-label" htmlFor="fullName">Full Name *</label>
-          <input 
-            type="text" 
-            className="form-control" 
-            id="fullName" 
-            value={data.fullName || ''}
-            onChange={(e) => handleInputChange('fullName', e.target.value)}
-            required 
-          />
-        </div>
-        
-        <div className="form-group">
-          <label className="form-label" htmlFor="email">Email Address *</label>
-          <input 
-            type="email" 
-            className="form-control" 
-            id="email" 
-            value={data.email || ''}
-            onChange={(e) => handleInputChange('email', e.target.value)}
-            required 
-          />
-        </div>
-        
-        <div className="form-group">
-          <label className="form-label" htmlFor="phone">Phone Number *</label>
-          <input 
-            type="tel" 
-            className="form-control" 
-            id="phone" 
-            value={data.phone || ''}
-            onChange={(e) => handleInputChange('phone', e.target.value)}
-            required 
-          />
-        </div>
-        
-        <div className="form-group">
-          <label className="form-label" htmlFor="location">City, State *</label>
-          <input 
-            type="text" 
-            className="form-control" 
-            id="location" 
-            value={data.location || ''}
-            onChange={(e) => handleInputChange('location', e.target.value)}
-            required 
-          />
-        </div>
-        
-        <div className="form-group span-2">
-          <label className="form-label" htmlFor="linkedIn">LinkedIn URL</label>
-          <input 
-            type="url" 
-            className="form-control" 
-            id="linkedIn" 
-            value={data.linkedIn || ''}
-            onChange={(e) => handleInputChange('linkedIn', e.target.value)}
-            placeholder="https://linkedin.com/in/yourprofile"
-          />
-        </div>
-      </form>
+      <p className="section-description">Use professional contact details. Keep your location concise; a full street address is not needed.</p>
+      <div className="form-grid">
+        {fields.map(field => <div className={`form-group ${field.span || ''}`} key={field.name}>
+          <label className="form-label" htmlFor={field.name}>{field.label}{field.required ? ' *' : ''}</label>
+          <input className="form-control" id={field.name} type={field.type} value={data[field.name] || ''} required={field.required || false} placeholder={field.placeholder} onChange={event => handleInputChange(field.name, event.target.value)} />
+        </div>)}
+      </div>
     </section>
   );
 }
