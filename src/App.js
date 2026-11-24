@@ -32,6 +32,10 @@ function App() {
     projects: [],
     customSections: [],
     skills: { technical: [], soft: [], other: [] },
+    targetJobDescription: '',
+    coverLetterDraft: '',
+    coverLetterCompany: '',
+    coverLetterRole: '',
     sectionNames: {
       summary: 'Professional Summary',
       experience: 'Work Experience',
@@ -131,6 +135,11 @@ function App() {
       education: sample.education || [],
       projects: sample.projects || [],
       skills: sample.skills || { technical: [], soft: [], other: [] },
+      customSections: sample.customSections || [],
+      targetJobDescription: '',
+      coverLetterDraft: '',
+      coverLetterCompany: '',
+      coverLetterRole: '',
       sectionNames: {
         summary: 'Professional Summary',
         experience: 'Work Experience',
@@ -231,6 +240,11 @@ function App() {
       })) : []),
       education: Array.isArray(source.education) ? source.education : (Array.isArray(source.educationHistory) ? source.educationHistory : (Array.isArray(source.education) ? source.education : [])),
       projects: Array.isArray(source.projects) ? source.projects : [],
+      targetJobDescription: source.targetJobDescription || '',
+      coverLetterDraft: source.coverLetterDraft || '',
+      coverLetterCompany: source.coverLetterCompany || '',
+      coverLetterRole: source.coverLetterRole || '',
+      customSections: Array.isArray(source.customSections) ? source.customSections : [],
       skills: (() => {
         if (source.skills && (Array.isArray(source.skills.technical) || Array.isArray(source.skills.soft) || Array.isArray(source.skills.other))) {
           return source.skills;
@@ -383,6 +397,8 @@ function App() {
         education: sections.education,
         projects: sections.projects,
         skills: sections.skills,
+        customSections: [],
+        targetJobDescription: '',
         sectionNames: {
           summary: 'Professional Summary',
           experience: 'Work Experience',
