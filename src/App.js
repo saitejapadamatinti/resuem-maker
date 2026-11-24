@@ -21,7 +21,7 @@ const TRACKING_ID = "G-G1SHXCNPED"; // Replace with your Measurement ID
 ReactGA.initialize(TRACKING_ID);
 function App() {
   const [currentStep, setCurrentStep] = useState(0);
-  const [steps, setSteps] = useState(['usage-guide', 'contact', 'websites', 'summary', 'experience', 'education', 'projects', 'skills', 'preview']);
+  const [steps, setSteps] = useState(['usage-guide', 'contact', 'websites', 'summary', 'experience', 'education', 'projects', 'skills', 'ats-guide', 'preview']);
   
   // Debug logging
   console.log('Current steps:', steps);
@@ -47,7 +47,6 @@ function App() {
   const [theme, setTheme] = useState('classic');
 
     useEffect(() => {
-    console.log('Theme changed to:', theme);
   }, [theme]);
   
 
@@ -73,6 +72,8 @@ function App() {
               updatedSteps.push(step);
             }
           });
+          if (!updatedSteps.includes('ats-guide')) updatedSteps.splice(Math.max(updatedSteps.indexOf('skills') + 1, 1), 0, 'ats-guide');
+          if (!updatedSteps.includes('preview')) updatedSteps.push('preview');
           setSteps(updatedSteps);
         }
       }
@@ -100,7 +101,6 @@ function App() {
   useEffect(() => {
     try {
       const savedTheme = localStorage.getItem('ats-resume-builder:theme');
-      console.log('Loading theme from localStorage:', savedTheme);
       if (savedTheme) setTheme(savedTheme);
     } catch {}
   }, []);
@@ -112,13 +112,10 @@ function App() {
   };
 
   const reorderSteps = (newSteps) => {
-    console.log('reorderSteps called with:', newSteps);
-    console.log('Current steps before reorder:', steps);
     const currentKey = steps[currentStep];
     setSteps(newSteps);
     const newIndex = newSteps.indexOf(currentKey);
     setCurrentStep(newIndex >= 0 ? newIndex : 0);
-    console.log('Steps reordered successfully');
   };
 
   const updateResumeData = (section, data) => {
@@ -189,7 +186,7 @@ function App() {
         websites: 'Websites & Links'
       }
     });
-    setSteps(['usage-guide', 'contact', 'websites', 'summary', 'experience', 'education', 'projects', 'skills', 'preview']);
+    setSteps(['usage-guide', 'contact', 'websites', 'summary', 'experience', 'education', 'projects', 'skills', 'ats-guide', 'preview']);
     setCurrentStep(0);
   };
 
@@ -199,6 +196,7 @@ function App() {
         resumeData,
         steps,
         currentStep,
+        schemaVersion: 2,
         exportedAt: new Date().toISOString()
       };
       const json = JSON.stringify(payload, null, 2);
@@ -277,7 +275,7 @@ function App() {
     setResumeData(normalized);
     setCurrentStep(0);
     if (Array.isArray(json.steps)) {
-      const valid = json.steps.filter(k => ['usage-guide','contact','websites','summary','experience','education','projects','skills','preview'].includes(k));
+      const valid = json.steps.filter(k => ['usage-guide','contact','websites','summary','experience','education','projects','skills','ats-guide','preview'].includes(k));
       if (valid.length) {
         // Ensure usage-guide is always the first step
         const updatedSteps = ['usage-guide'];
@@ -286,6 +284,8 @@ function App() {
             updatedSteps.push(step);
           }
         });
+        if (!updatedSteps.includes('ats-guide')) updatedSteps.splice(Math.max(updatedSteps.indexOf('skills') + 1, 1), 0, 'ats-guide');
+        if (!updatedSteps.includes('preview')) updatedSteps.push('preview');
         setSteps(updatedSteps);
       }
     }
@@ -463,7 +463,7 @@ function App() {
         />
       </div>
       <div style={{ display: 'none' }} data-theme={theme} />
-      <div className='large-screen-message'>Please Open Laptop or Desktop</div>
+      
       <Footer />
     </div>
   );
