@@ -58,26 +58,33 @@ function App() {
         const parsed = JSON.parse(raw);
         if (parsed && typeof parsed === 'object') setResumeData(parsed);
       }
+
+      let storedSteps = null;
+      let restoredSteps = null;
       const rawSteps = localStorage.getItem(STORAGE_STEPS_KEY);
       if (rawSteps) {
-        const parsedSteps = JSON.parse(rawSteps);
-        if (Array.isArray(parsedSteps) && parsedSteps.length) {
-          // Ensure usage-guide is always the first step
-          const updatedSteps = ['usage-guide'];
-          parsedSteps.forEach(step => {
-            if (step !== 'usage-guide') {
-              updatedSteps.push(step);
-            }
+        storedSteps = JSON.parse(rawSteps);
+        if (Array.isArray(storedSteps) && storedSteps.length) {
+          // Upgrade older saved navigation while retaining the user's section order.
+          restoredSteps = ['usage-guide'];
+          storedSteps.forEach(step => {
+            if (step !== 'usage-guide' && step !== 'ats-guide') restoredSteps.push(step);
           });
-          if (!updatedSteps.includes('ats-guide')) updatedSteps.splice(Math.max(updatedSteps.indexOf('skills') + 1, 1), 0, 'ats-guide');
-          if (!updatedSteps.includes('preview')) updatedSteps.push('preview');
-          setSteps(updatedSteps);
+          if (!restoredSteps.includes('ats-guide')) {
+            const skillsIndex = restoredSteps.indexOf('skills');
+            restoredSteps.splice(skillsIndex >= 0 ? skillsIndex + 1 : restoredSteps.length - 1, 0, 'ats-guide');
+          }
+          if (!restoredSteps.includes('preview')) restoredSteps.push('preview');
+          setSteps(restoredSteps);
         }
       }
+
       const rawIndex = localStorage.getItem(STORAGE_STEP_INDEX_KEY);
       if (rawIndex !== null) {
         const idx = Number(rawIndex);
-        setCurrentStep(Number.isNaN(idx) ? 0 : Math.min(Math.max(0, idx), 9));
+        const oldStepKey = Array.isArray(storedSteps) ? storedSteps[idx] : null;
+        const mappedIndex = oldStepKey && restoredSteps ? restoredSteps.indexOf(oldStepKey) : idx;
+        setCurrentStep(Number.isFinite(mappedIndex) ? Math.max(0, Math.min(mappedIndex, (restoredSteps || steps).length - 1)) : 0);
       }
     } catch {}
   }, []);
