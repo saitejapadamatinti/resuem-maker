@@ -36,6 +36,7 @@ function App() {
     coverLetterDraft: '',
     coverLetterCompany: '',
     coverLetterRole: '',
+    importedText: '',
     sectionNames: {
       summary: 'Professional Summary',
       experience: 'Work Experience',
@@ -140,6 +141,7 @@ function App() {
       coverLetterDraft: '',
       coverLetterCompany: '',
       coverLetterRole: '',
+      importedText: '',
       sectionNames: {
         summary: 'Professional Summary',
         experience: 'Work Experience',
@@ -182,6 +184,7 @@ function App() {
       coverLetterDraft: '',
       coverLetterCompany: '',
       coverLetterRole: '',
+      importedText: '',
       skills: { technical: [], soft: [], other: [] },
       sectionNames: {
         summary: 'Professional Summary',
@@ -249,6 +252,7 @@ function App() {
       coverLetterDraft: source.coverLetterDraft || '',
       coverLetterCompany: source.coverLetterCompany || '',
       coverLetterRole: source.coverLetterRole || '',
+      importedText: source.importedText || '',
       customSections: Array.isArray(source.customSections) ? source.customSections : [],
       skills: (() => {
         if (source.skills && (Array.isArray(source.skills.technical) || Array.isArray(source.skills.soft) || Array.isArray(source.skills.other))) {
@@ -404,6 +408,7 @@ function App() {
         skills: sections.skills,
         customSections: [],
         targetJobDescription: '',
+        importedText: text,
         sectionNames: {
           summary: 'Professional Summary',
           experience: 'Work Experience',
