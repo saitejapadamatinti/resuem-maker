@@ -177,6 +177,11 @@ function App() {
       experience: [], 
       education: [], 
       projects: [], 
+      customSections: [],
+      targetJobDescription: '',
+      coverLetterDraft: '',
+      coverLetterCompany: '',
+      coverLetterRole: '',
       skills: { technical: [], soft: [], other: [] },
       sectionNames: {
         summary: 'Professional Summary',
