@@ -100,6 +100,7 @@ function Sidebar({ currentStep, steps, progress, onStepClick, onReorderSteps, on
               {step === 'projects' && 'Projects'}
               {step === 'custom' && 'Custom'}
               {step === 'skills' && 'Skills'}
+              {step === 'ats-guide' && 'ATS & Job Match'}
               {step === 'preview' && 'Preview'}
             </span>
             <span className="drag-handle" title="Drag to reorder">
