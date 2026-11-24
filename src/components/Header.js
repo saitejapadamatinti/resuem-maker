@@ -177,6 +177,7 @@ function Header({ theme = 'classic', onChangeTheme, onImportResume, onImportPdf,
             <option value="elegant">Elegant</option>
             <option value="compact">Compact</option>
             <option value="professional">Professional</option>
+            <option value="reference">Classic Resume (Reference PDF)</option>
             <option value="twocol">Two Column</option>
           </select>
           <button className="btn btn--outline" onClick={handleImportClick}>Import JSON/PDF</button>
