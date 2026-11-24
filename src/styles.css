@@ -5684,3 +5684,13 @@ p {
   .theme-reference { padding: 22px 18px !important; }
   .theme-reference .resume-header h1 { font-size: 21px !important; }
 }
+
+.theme-reference .reference-headline {
+  font-family: Georgia, 'Times New Roman', serif !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+  letter-spacing: .02em;
+  margin: 0 0 5px;
+  color: #111;
+}
