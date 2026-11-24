@@ -179,6 +179,7 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
       if (data.contact.phone) contactDetails.push({ icon: '☎', text: data.contact.phone });
       if (data.contact.location) contactDetails.push({ icon: '⌖', text: data.contact.location });
       if (data.contact.linkedIn) contactDetails.push({ icon: '●', text: data.contact.linkedIn });
+      if (data.contact.website) contactDetails.push({ icon: '↗', text: data.contact.website });
       
       if (contactDetails.length > 0) {
         pdf.setFont('helvetica', 'normal');
@@ -485,6 +486,7 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
       }
       
       // Contact details on separate lines
+      if (data.contact.headline) contactContent.push({ type: 'text', text: data.contact.headline });
       if (data.contact.email) {
         contactContent.push({ type: 'text', text: `Email: ${data.contact.email}` });
       }
@@ -497,6 +499,7 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
       if (data.contact.linkedIn) {
         contactContent.push({ type: 'text', text: `LinkedIn: ${data.contact.linkedIn}` });
       }
+      if (data.contact.website) contactContent.push({ type: 'text', text: `Portfolio: ${data.contact.website}` });
       
       if (contactContent.length > 0) {
         sections.push({ title: '', content: contactContent });
