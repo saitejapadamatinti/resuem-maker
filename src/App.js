@@ -10,8 +10,11 @@ import * as pdfjsLib from 'pdfjs-dist';
 import Tesseract from 'tesseract.js';
 import ReactGA from "react-ga4";
 
-// Disable external worker; we'll run without a worker to avoid fetch issues
-try { pdfjsLib.GlobalWorkerOptions.workerSrc = undefined; } catch {}
+// PDF.js requires a worker matching the installed pdfjs-dist version.
+try {
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
+} catch {}
 
 const STORAGE_KEY = 'ats-resume-builder:data:v1';
 const STORAGE_STEPS_KEY = 'ats-resume-builder:steps:v1';
@@ -317,8 +320,15 @@ function App() {
     }
   };
 
+  const openPdfDocument = (arrayBuffer) => {
+    // PDF.js may transfer its input buffer to the worker. Always parse a fresh copy,
+    // so OCR can reopen the original bytes if text extraction finds no text.
+    const bytes = new Uint8Array(arrayBuffer.slice(0));
+    return pdfjsLib.getDocument({ data: bytes, isEvalSupported: false }).promise;
+  };
+
   const extractTextWithPdfJs = async (arrayBuffer) => {
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer, useWorker: false }).promise;
+    const pdf = await openPdfDocument(arrayBuffer);
     let fullText = '';
     for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i);
@@ -330,16 +340,17 @@ function App() {
   };
 
   const extractTextWithOcr = async (arrayBuffer) => {
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer, useWorker: false }).promise;
+    const pdf = await openPdfDocument(arrayBuffer);
     let text = '';
     const maxPages = Math.min(pdf.numPages, 10);
     for (let i = 1; i <= maxPages; i++) {
       const page = await pdf.getPage(i);
       const viewport = page.getViewport({ scale: 3 });
       const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d');
-      canvas.width = viewport.width;
-      canvas.height = viewport.height;
+      const context = canvas.getContext('2d', { willReadFrequently: true });
+      if (!context) throw new Error('Canvas is unavailable for OCR rendering.');
+      canvas.width = Math.ceil(viewport.width);
+      canvas.height = Math.ceil(viewport.height);
       await page.render({ canvasContext: context, viewport }).promise;
       const dataUrl = canvas.toDataURL('image/png');
       const result = await Tesseract.recognize(dataUrl, 'eng', { logger: () => {} });
@@ -351,17 +362,22 @@ function App() {
   const importPdf = async (arrayBuffer) => {
     try {
       let text = '';
+      let textExtractionError = null;
       try {
         text = await extractTextWithPdfJs(arrayBuffer);
-      } catch {}
+      } catch (error) {
+        textExtractionError = error;
+        console.warn('PDF text layer extraction failed; attempting OCR:', error);
+      }
 
-      if (!text || text.length < 200) {
+      // Image-only and low-text PDFs need OCR. This path is automatic.
+      if (!text || text.replace(/\\s/g, '').length < 120) {
         const ocrText = await extractTextWithOcr(arrayBuffer);
         if (ocrText && ocrText.length > text.length) text = ocrText;
       }
 
-      if (!text || text.length < 50) {
-        alert('Could not read the PDF. If it is scanned, try a higher-quality scan or share a sample.');
+      if (!text || text.replace(/\\s/g, '').length < 30) {
+        alert('No readable text was found, even after OCR. The PDF may be password-protected, damaged, or too low-resolution. Try opening it and choosing Print → Save as PDF, then import the new file.');
         return;
       }
 
@@ -427,8 +443,15 @@ function App() {
       });
       setCurrentStep(0);
     } catch (e) {
-      console.error('PDF import failed', e);
-      alert('Could not read the PDF. Try a clearer text-based PDF or enable OCR.');
+      console.error('PDF import failed:', e);
+      const detail = String(e?.message || textExtractionError?.message || '').toLowerCase();
+      if (detail.includes('password') || detail.includes('encrypted')) {
+        alert('This PDF is password-protected. Remove the password and try importing it again.');
+      } else if (detail.includes('worker') || detail.includes('fake worker')) {
+        alert('The PDF reader could not load its worker. Check your internet connection and refresh the app. OCR is attempted automatically when PDF pages can be rendered.');
+      } else {
+        alert('PDF import failed. Try Print → Save as PDF and upload the new file. If the file is a scan, use a clear, upright, high-resolution scan.');
+      }
     }
   };
 
