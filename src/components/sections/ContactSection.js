@@ -22,6 +22,10 @@ function ContactSection({ data = {}, onUpdate }) {
           <label className="form-label" htmlFor={field.name}>{field.label}{field.required ? ' *' : ''}</label>
           <input className="form-control" id={field.name} type={field.type} value={data[field.name] || ''} required={field.required || false} placeholder={field.placeholder} onChange={event => handleInputChange(field.name, event.target.value)} />
         </div>)}
+        <div className="form-group span-2">
+          <label className="form-label" htmlFor="resumeHeadline">Resume headline / profile statement</label>
+          <textarea className="form-control" id="resumeHeadline" rows="3" value={data.resumeHeadline || ''} placeholder="A concise 1–2 sentence summary of your professional profile and strengths." onChange={event => handleInputChange('resumeHeadline', event.target.value)} />
+        </div>
       </div>
     </section>
   );

@@ -8,8 +8,8 @@ A React-based resume studio for building, reviewing, tailoring and exporting pro
 - Guided sections for contact details, professional links, summary, work experience, education, projects and skills.
 - Add, edit and remove experience, achievements, education, project and custom-section entries.
 - Reorder resume sections from the navigation sidebar.
-- Six presentation themes: Classic, Modern, Elegant, Compact, Professional and Two Column.
-- Advanced preview styling, typography, spacing, page guides and ATS-friendly export controls.
+- Eight FlowCV Simple collection-inspired templates with an instant live preview: Classic, Clear, True Blue, Editorial, Rule, Steady Form, Precision Line and Classic Serif.
+- Original, ATS-conscious single-column layouts with distinct typography, spacing, section dividers, responsive template cards and matching selectable-text PDF styling.
 - Sample resume data to explore the editor without entering personal information.
 
 ### ATS and job tailoring

@@ -168,10 +168,6 @@ function Header({ theme = 'classic', onChangeTheme, onImportResume, onImportPdf,
             onChange={handleFileChange}
             style={{ display: 'none' }}
           />
-          <div className="professional-theme-label" aria-label="Resume design">
-            <span className="professional-theme-dot" />
-            <span>Professional Resume</span>
-          </div>
           <button className="btn btn--outline" onClick={handleImportClick}>Import JSON/PDF</button>
         </div>
       </div>

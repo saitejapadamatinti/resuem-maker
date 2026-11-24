@@ -372,12 +372,12 @@ function App() {
       }
 
       // Image-only and low-text PDFs need OCR. This path is automatic.
-      if (!text || text.replace(/\\s/g, '').length < 120) {
+      if (!text || text.replace(/\s/g, '').length < 120) {
         const ocrText = await extractTextWithOcr(arrayBuffer);
         if (ocrText && ocrText.length > text.length) text = ocrText;
       }
 
-      if (!text || text.replace(/\\s/g, '').length < 30) {
+      if (!text || text.replace(/\s/g, '').length < 30) {
         alert('No readable text was found, even after OCR. The PDF may be password-protected, damaged, or too low-resolution. Try opening it and choosing Print → Save as PDF, then import the new file.');
         return;
       }
@@ -387,7 +387,8 @@ function App() {
         email: (text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i) || [,''])[1] || (text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i) || [])[0] || '',
         phone: (text.match(/(\+?\d[\d\s\-()]{8,}\d)/) || [,''])[1] || '',
         location: (text.match(/\b([A-Za-z]+,\s*[A-Za-z]{2,})\b/) || [,''])[1] || '',
-        linkedIn: (text.match(/https?:\/\/(?:www\.)?linkedin\.com\/[A-Za-z0-9_\-/]+/i) || [,''])[1] || ''
+        linkedIn: (text.match(/https?:\/\/(?:www\.)?linkedin\.com\/[A-Za-z0-9_\-/]+/i) || [,''])[1] || '',
+        resumeHeadline: ((text.match(/RESUME HEADLINE\s*([\s\S]*?)(?=\n(?:PROFESSIONAL SUMMARY|TECHNICAL SKILLS|PROFESSIONAL EXPERIENCE)\b)/i) || [,''])[1] || '').replace(/\s+/g, ' ').trim()
       };
 
       const websites = Array.from(new Set([

@@ -19,9 +19,11 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
   const [dividerStyle, setDividerStyle] = useState('solid');
   const [showGuides, setShowGuides] = useState(true);
   const [atsFriendly, setAtsFriendly] = useState(true);
+  const templates = [{id:'classic',name:'Classic',detail:'Timeless, straightforward, and highly readable',tag:'Simple'},{id:'clear',name:'Clear',detail:'Open spacing with a crisp section hierarchy',tag:'Minimal'},{id:'true-blue',name:'True Blue',detail:'A restrained blue accent with a clean structure',tag:'Subtle color'},{id:'editorial',name:'Editorial',detail:'Elegant typography and balanced white space',tag:'Refined'},{id:'rule',name:'Rule',detail:'Strong horizontal rules and clear section breaks',tag:'Structured'},{id:'steady-form',name:'Steady Form',detail:'Balanced alignment for professional experience',tag:'Professional'},{id:'precision-line',name:'Precision Line',detail:'Precise dividers and compact information flow',tag:'Focused'},{id:'classic-serif',name:'Classic Serif',detail:'Traditional serif typography and formal styling',tag:'Traditional'}];
+  const [selectedTemplate, setSelectedTemplate] = useState(() => { try { const saved = localStorage.getItem('ats-resume-builder:template'); return templates.some(item => item.id === saved) ? saved : 'classic'; } catch { return 'classic'; } });
+  useEffect(() => { try { localStorage.setItem('ats-resume-builder:template', selectedTemplate); } catch {} }, [selectedTemplate]);
 
-  // Debug theme
-  console.log('PreviewSection received theme:', theme);
+  // Legacy theme prop retained for backwards compatibility; selectedTemplate controls the layout.
 
   // A4 in points used by jsPDF
   const A4_WIDTH_PT = 595.28;
@@ -103,16 +105,13 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
       const pdf = new jsPDF('p', 'pt', 'a4');
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
-      const margin = 50;
+      const margin = selectedTemplate === 'precision-line' ? 42 : 50;
       let yPosition = margin;
       
       // Color scheme matching the visual design
-      const colors = {
-        primary: [79, 70, 229], // #4f46e5 - matches accentColor
-        text: [31, 41, 55], // #1f2937 - dark gray
-        secondary: [107, 114, 128], // #6b7280 - medium gray
-        light: [243, 244, 246] // #f3f4f6 - light gray
-      };
+      const templatePalettes = { classic: [35,35,35], clear: [55,65,81], 'true-blue': [37,99,235], editorial: [71,85,105], rule: [31,41,55], 'steady-form': [51,65,85], 'precision-line': [30,64,95], 'classic-serif': [45,45,45] };
+      const accent = templatePalettes[selectedTemplate] || templatePalettes.classic;
+      const colors = { primary: accent, text: [31,41,55], secondary: [90,100,112], light: [245,246,248] };
       
       // Generate styled content
       await generateStyledContent(pdf, resumeData, colors, margin, pageWidth, pageHeight);
@@ -132,6 +131,7 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
   
   // Generate professionally styled PDF content
   const generateStyledContent = async (pdf, data, colors, margin, pageWidth, pageHeight) => {
+    const referenceStyle = selectedTemplate === 'classic-serif';
     let yPos = margin;
     const lineHeight = 16;
     const sectionSpacing = 25;
@@ -149,30 +149,39 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
     // Helper function to draw section divider
     const drawSectionDivider = (y, color = colors.primary) => {
       pdf.setDrawColor(...color);
-      pdf.setLineWidth(1.5);
+      pdf.setLineWidth(referenceStyle ? 0.65 : 1.5);
       pdf.line(margin, y, pageWidth - margin, y);
     };
     
-    // 1. CONTACT HEADER (Styled like the visual resume)
+    // Reference style uses a compact centered serif masthead.
+    pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'normal');
+    // 1. CONTACT HEADER
     if (data.contact) {
       checkPageOverflow(80);
       
       // Name - Large and prominent
       if (data.contact.fullName) {
-        pdf.setFont('helvetica', 'bold');
-        pdf.setFontSize(24);
+        pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'bold');
+        pdf.setFontSize(referenceStyle ? 22 : 24);
         pdf.setTextColor(...colors.text);
         
         const nameWidth = pdf.getStringUnitWidth(data.contact.fullName) * 24 / pdf.internal.scaleFactor;
-        const nameX = (pageWidth - nameWidth) / 2; // Center the name
+        const nameX = referenceStyle ? (pageWidth - nameWidth) / 2 : margin;
         pdf.text(data.contact.fullName, nameX, yPos);
         yPos += 35;
         
-        // Add accent line under name
-        drawSectionDivider(yPos - 10, colors.primary);
-        yPos += 15;
+        if (selectedTemplate === 'rule' || selectedTemplate === 'precision-line') drawSectionDivider(yPos - 10, colors.primary);
+        yPos += referenceStyle ? 2 : 15;
       }
       
+      if (referenceStyle && data.contact.headline) {
+        pdf.setFont('times', 'bold');
+        pdf.setFontSize(11);
+        const roleLines = pdf.splitTextToSize(data.contact.headline.toUpperCase(), pageWidth - 2 * margin);
+        pdf.text(roleLines, pageWidth / 2, yPos, { align: 'center' });
+        yPos += roleLines.length * 14 + 3;
+      }
+
       // Contact details in a professional layout
       const contactDetails = [];
       if (data.contact.email) contactDetails.push({ icon: '✉', text: data.contact.email });
@@ -182,12 +191,12 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
       if (data.contact.website) contactDetails.push({ icon: '↗', text: data.contact.website });
       
       if (contactDetails.length > 0) {
-        pdf.setFont('helvetica', 'normal');
-        pdf.setFontSize(11);
+        pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'normal');
+        pdf.setFontSize(referenceStyle ? 9.5 : 11);
         pdf.setTextColor(...colors.secondary);
         
         // Arrange contact details in two columns if more than 2 items
-        const itemsPerRow = contactDetails.length > 2 ? 2 : contactDetails.length;
+        const itemsPerRow = referenceStyle ? 1 : (contactDetails.length > 2 ? 2 : contactDetails.length);
         const colWidth = (pageWidth - 2 * margin) / itemsPerRow;
         
         contactDetails.forEach((detail, index) => {
@@ -196,37 +205,55 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
           const x = margin + (col * colWidth);
           const y = yPos + (row * lineHeight);
           
-          pdf.text(`${detail.icon} ${detail.text}`, x, y);
+          const detailText = detail.text;
+          pdf.text(detailText, referenceStyle ? pageWidth / 2 : x, y, referenceStyle ? { align: 'center' } : {});
         });
         
-        yPos += Math.ceil(contactDetails.length / itemsPerRow) * lineHeight + sectionSpacing;
+        yPos += Math.ceil(contactDetails.length / itemsPerRow) * (referenceStyle ? 12 : lineHeight) + (referenceStyle ? 14 : sectionSpacing);
       }
     }
     
-    // 2. PROFESSIONAL SUMMARY
+    // 2. RESUME HEADLINE (reference PDF section)
+    if (referenceStyle && data.contact?.resumeHeadline?.trim()) {
+      checkPageOverflow(45);
+      pdf.setFont('times', 'bold');
+      pdf.setFontSize(12);
+      pdf.setTextColor(...colors.text);
+      pdf.text('RESUME HEADLINE', margin, yPos);
+      yPos += 14;
+      drawSectionDivider(yPos, colors.primary);
+      yPos += 10;
+      pdf.setFont('times', 'normal');
+      pdf.setFontSize(10.5);
+      const headlineLines = pdf.splitTextToSize(data.contact.resumeHeadline.trim(), pageWidth - 2 * margin);
+      pdf.text(headlineLines, margin, yPos);
+      yPos += headlineLines.length * 13 + 14;
+    }
+
+    // 3. PROFESSIONAL SUMMARY
     if (data.summary && data.summary.trim()) {
       checkPageOverflow(60);
       
       const summaryText = data.summary.replace(/<[^>]*>/g, '').trim();
       if (summaryText) {
         // Section title
-        pdf.setFont('helvetica', 'bold');
-        pdf.setFontSize(14);
+        pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'bold');
+        pdf.setFontSize(referenceStyle ? 12 : 14);
         pdf.setTextColor(...colors.primary);
         pdf.text('PROFESSIONAL SUMMARY', margin, yPos);
         yPos += 20;
         
-        drawSectionDivider(yPos - 10);
-        yPos += 10;
+        drawSectionDivider(yPos - 8);
+        yPos += referenceStyle ? 7 : 10;
         
         // Summary content
-        pdf.setFont('helvetica', 'normal');
-        pdf.setFontSize(11);
+        pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'normal');
+        pdf.setFontSize(referenceStyle ? 10.5 : 11);
         pdf.setTextColor(...colors.text);
         
         const textLines = pdf.splitTextToSize(summaryText, pageWidth - 2 * margin);
         pdf.text(textLines, margin, yPos);
-        yPos += textLines.length * lineHeight + sectionSpacing;
+        yPos += textLines.length * (referenceStyle ? 13 : lineHeight) + (referenceStyle ? 14 : sectionSpacing);
       }
     }
     
@@ -235,7 +262,7 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
       checkPageOverflow(80);
       
       // Section title
-      pdf.setFont('helvetica', 'bold');
+      pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'bold');
       pdf.setFontSize(14);
       pdf.setTextColor(...colors.primary);
       pdf.text('WORK EXPERIENCE', margin, yPos);
@@ -249,14 +276,14 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
           checkPageOverflow(100);
           
           // Job title - prominent and bold
-          pdf.setFont('helvetica', 'bold');
+          pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'bold');
           pdf.setFontSize(12);
           pdf.setTextColor(...colors.text);
           pdf.text(exp.title, margin, yPos);
           yPos += 18;
           
           // Company and dates on same line
-          pdf.setFont('helvetica', 'normal');
+          pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'normal');
           pdf.setFontSize(11);
           pdf.setTextColor(...colors.secondary);
           
@@ -272,7 +299,7 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
           
           // Achievements with proper bullet formatting
           if (exp.achievements && exp.achievements.length > 0) {
-            pdf.setFont('helvetica', 'normal');
+            pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'normal');
             pdf.setFontSize(10);
             pdf.setTextColor(...colors.text);
             
@@ -301,7 +328,7 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
       checkPageOverflow(60);
       
       // Section title
-      pdf.setFont('helvetica', 'bold');
+      pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'bold');
       pdf.setFontSize(14);
       pdf.setTextColor(...colors.primary);
       pdf.text('EDUCATION', margin, yPos);
@@ -315,14 +342,14 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
           checkPageOverflow(50);
           
           // Degree
-          pdf.setFont('helvetica', 'bold');
+          pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'bold');
           pdf.setFontSize(12);
           pdf.setTextColor(...colors.text);
           pdf.text(edu.degree, margin, yPos);
           yPos += 18;
           
           // School and graduation date
-          pdf.setFont('helvetica', 'normal');
+          pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'normal');
           pdf.setFontSize(11);
           pdf.setTextColor(...colors.secondary);
           
@@ -336,7 +363,7 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
           
           // GPA if available
           if (edu.gpa) {
-            pdf.setFont('helvetica', 'normal');
+            pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'normal');
             pdf.setFontSize(10);
             pdf.setTextColor(...colors.text);
             pdf.text(`GPA: ${edu.gpa}`, margin, yPos);
@@ -353,7 +380,7 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
       checkPageOverflow(60);
       
       // Section title
-      pdf.setFont('helvetica', 'bold');
+      pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'bold');
       pdf.setFontSize(14);
       pdf.setTextColor(...colors.primary);
       pdf.text('SKILLS', margin, yPos);
@@ -364,13 +391,13 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
       
       // Technical Skills
       if (data.skills.technical && data.skills.technical.length > 0) {
-        pdf.setFont('helvetica', 'bold');
+        pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'bold');
         pdf.setFontSize(11);
         pdf.setTextColor(...colors.text);
         pdf.text('Technical Skills:', margin, yPos);
         yPos += 16;
         
-        pdf.setFont('helvetica', 'normal');
+        pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'normal');
         pdf.setFontSize(10);
         pdf.setTextColor(...colors.text);
         const techSkillsText = data.skills.technical.join(' • ');
@@ -383,13 +410,13 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
       if (data.skills.soft && data.skills.soft.length > 0) {
         checkPageOverflow(30);
         
-        pdf.setFont('helvetica', 'bold');
+        pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'bold');
         pdf.setFontSize(11);
         pdf.setTextColor(...colors.text);
         pdf.text('Soft Skills:', margin, yPos);
         yPos += 16;
         
-        pdf.setFont('helvetica', 'normal');
+        pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'normal');
         pdf.setFontSize(10);
         pdf.setTextColor(...colors.text);
         const softSkillsText = data.skills.soft.join(' • ');
@@ -402,13 +429,13 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
       if (data.skills.other && data.skills.other.length > 0) {
         checkPageOverflow(30);
         
-        pdf.setFont('helvetica', 'bold');
+        pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'bold');
         pdf.setFontSize(11);
         pdf.setTextColor(...colors.text);
         pdf.text('Other Skills:', margin, yPos);
         yPos += 16;
         
-        pdf.setFont('helvetica', 'normal');
+        pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'normal');
         pdf.setFontSize(10);
         pdf.setTextColor(...colors.text);
         const otherSkillsText = data.skills.other.join(' • ');
@@ -423,7 +450,7 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
       checkPageOverflow(60);
       
       // Section title
-      pdf.setFont('helvetica', 'bold');
+      pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'bold');
       pdf.setFontSize(14);
       pdf.setTextColor(...colors.primary);
       pdf.text('PROJECTS', margin, yPos);
@@ -437,7 +464,7 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
           checkPageOverflow(50);
           
           // Project name
-          pdf.setFont('helvetica', 'bold');
+          pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'bold');
           pdf.setFontSize(12);
           pdf.setTextColor(...colors.text);
           pdf.text(project.name, margin, yPos);
@@ -445,7 +472,7 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
           
           // Project URL if available
           if (project.url) {
-            pdf.setFont('helvetica', 'normal');
+            pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'normal');
             pdf.setFontSize(10);
             pdf.setTextColor(...colors.secondary);
             pdf.text(project.url, margin, yPos);
@@ -456,7 +483,7 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
           if (project.description) {
             const cleanDesc = project.description.replace(/<[^>]*>/g, '').trim();
             if (cleanDesc) {
-              pdf.setFont('helvetica', 'normal');
+              pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'normal');
               pdf.setFontSize(10);
               pdf.setTextColor(...colors.text);
               
@@ -506,6 +533,11 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
       }
     }
     
+    // Resume Headline
+    if (data.contact?.resumeHeadline?.trim()) {
+      sections.push({ title: 'Resume Headline', content: [{ type: 'text', text: data.contact.resumeHeadline.trim() }] });
+    }
+
     // Professional Summary
     if (data.summary && data.summary.trim()) {
       const summaryText = data.summary.replace(/<[^>]*>/g, '').trim();
@@ -1155,23 +1187,23 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
 
   return (
     <section className="section active">
-      <h2>Resume Preview</h2>
-      <p className="section-description">Preview how your resume will appear when downloaded</p>
-      
-      {/* Theme indicator for debugging */}
-      <div style={{ 
-        padding: '8px 16px', 
-        background: '#f0f0f0', 
-        borderRadius: '8px', 
-        marginBottom: '16px',
-        fontSize: '14px',
-        color: '#666'
-      }}>
-        Current Theme: <strong>{theme}</strong>
+      <div className="resume-preview-heading">
+        <div><span className="resume-eyebrow">YOUR DOCUMENT</span><h2>Choose your resume template</h2><p className="section-description">Pick a polished layout and see your resume update instantly.</p></div>
+        <span className="resume-live-pill"><span /> Live preview</span>
       </div>
+      <div className="resume-template-grid" role="list" aria-label="Resume templates">
+        {templates.map((template) => (
+          <button type="button" key={template.id} role="listitem" className={selectedTemplate === template.id ? 'resume-template-card is-selected' : 'resume-template-card'} onClick={() => setSelectedTemplate(template.id)} aria-pressed={selectedTemplate === template.id}>
+            <span className={'template-mini template-mini--' + template.id} aria-hidden="true"><span className="mini-name" /><span className="mini-contact" /><span className="mini-section" /><span className="mini-line" /><span className="mini-line short" /><span className="mini-section second" /><span className="mini-line" /><span className="mini-line medium" /><span className="mini-line" /></span>
+            <span className="template-card-meta"><span className="template-card-title">{template.name}</span><span className="template-card-detail">{template.detail}</span><span className="template-card-tag">{template.tag}</span></span>
+            {selectedTemplate === template.id && <span className="template-selected-mark">✓</span>}
+          </button>
+        ))}
+      </div>
+      <div className="resume-preview-toolbar"><strong>{templates.find(item => item.id === selectedTemplate)?.name}</strong><span>A4 page · Editable live preview · Simple layout</span></div>
       
       <div 
-        className={`resume-preview ${atsFriendly ? 'ats-friendly' : ''} theme-${theme}`}
+        className={`resume-preview ${atsFriendly ? 'ats-friendly' : ''} layout-${selectedTemplate}`}
         style={{ 
           position: 'relative',
           ['--resume-font-family']: fontFamily,
@@ -1188,7 +1220,7 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
       >
         <div className="resume-header">
           <h1>{resumeData.contact.fullName || 'Your Name'}</h1>
-          {theme === 'reference' && resumeData.contact.headline && <div className="reference-headline">{resumeData.contact.headline}</div>}
+          {resumeData.contact.headline && <div className="reference-headline">{resumeData.contact.headline}</div>}
           <div className="contact-info">
             {resumeData.contact.phone && <span>{resumeData.contact.phone}</span>}
             {resumeData.contact.email && (

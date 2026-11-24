@@ -5836,3 +5836,124 @@ p {
   flex-direction: column !important;
   gap: 13px !important;
 }
+
+
+.header-theme-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 190px;
+}
+.header-theme-picker .form-control {
+  min-width: 190px;
+  max-width: 240px;
+  padding: 8px 30px 8px 10px;
+  font-size: 13px;
+}
+.theme-reference .resume-header { text-align: center; }
+.theme-reference .resume-header .reference-headline {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  letter-spacing: .04em;
+  margin: 3px 0 5px;
+}
+@media (max-width: 640px) {
+  .header-theme-picker { min-width: 0; width: 100%; }
+  .header-theme-picker .form-control { width: 100%; max-width: none; }
+}
+
+
+/* FlowCV-inspired resume template gallery and live preview */
+.resume-preview-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:20px}
+.resume-eyebrow{display:block;color:#64748b;font-size:11px;font-weight:800;letter-spacing:.12em;margin-bottom:7px}
+.resume-preview-heading h2{margin:0 0 7px;font-size:25px;color:#172033}
+.resume-preview-heading .section-description{margin:0;color:#64748b;max-width:620px}
+.resume-live-pill{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;border:1px solid #bbf7d0;background:#f0fdf4;color:#166534;border-radius:999px;padding:7px 11px;font-size:12px;font-weight:700}
+.resume-live-pill span{width:7px;height:7px;border-radius:50%;background:#22c55e}
+.resume-template-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:20px 0 24px}
+.resume-template-card{position:relative;display:flex;flex-direction:column;gap:11px;min-width:0;padding:12px;text-align:left;border:1px solid #e2e8f0;border-radius:13px;background:#fff;cursor:pointer;transition:border-color .18s,box-shadow .18s,transform .18s;color:#172033}
+.resume-template-card:hover{border-color:#94a3b8;transform:translateY(-2px);box-shadow:0 8px 22px rgba(15,23,42,.08)}
+.resume-template-card.is-selected{border:2px solid #2563eb;padding:11px;box-shadow:0 0 0 3px rgba(37,99,235,.09)}
+.template-mini{display:block;width:100%;aspect-ratio:.78;padding:13% 12%;background:#fff;border:1px solid #e5e7eb;box-shadow:0 2px 7px rgba(15,23,42,.06);overflow:hidden}
+.template-mini span{display:block}
+.template-mini .mini-name{height:8px;width:64%;background:#1e293b;margin:4% 0}
+.template-mini .mini-contact{height:3px;width:85%;background:#cbd5e1;margin-bottom:13%}
+.template-mini .mini-section{height:4px;width:40%;background:#2563eb;margin-bottom:5%}
+.template-mini .mini-line{height:3px;width:100%;background:#dbe2ea;margin:5% 0}
+.template-mini .mini-line.short{width:65%}
+.template-mini .mini-line.medium{width:82%}
+.template-mini .mini-section.second{margin-top:12%}
+.template-mini--classic-clean .mini-section{background:#475569}
+.template-mini--executive .mini-section{background:#0f172a}
+.template-mini--executive .mini-name{width:78%;height:10px}
+.template-mini--compact-clean{padding-top:9%}
+.template-mini--compact-clean .mini-contact{margin-bottom:8%}
+.template-mini--graduate .mini-section{background:#0f766e}
+.template-mini--contemporary .mini-section{background:#7c3aed}
+.template-card-meta{display:flex;flex-direction:column;gap:4px}
+.template-card-title{font-size:13px;font-weight:750}
+.template-card-detail{color:#64748b;font-size:11px;line-height:1.35;min-height:29px}
+.template-card-tag{color:#475569;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.template-selected-mark{position:absolute;right:18px;top:18px;display:grid;place-items:center;width:22px;height:22px;border-radius:50%;color:#fff;background:#2563eb;font-size:13px;font-weight:800}
+.resume-preview-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 auto 12px;max-width:8.5in;color:#64748b;font-size:12px}
+.resume-preview{border-radius:3px!important;padding:.58in!important;background:#fff!important;color:#172033!important}
+.resume-preview .resume-header{text-align:left;border-bottom:1px solid #cbd5e1;padding-bottom:18px;margin-bottom:20px}
+.resume-preview .resume-header h1{font-size:29px;letter-spacing:-.04em;color:#172033}
+.resume-preview .contact-info{justify-content:flex-start;gap:6px 13px;font-size:11px}
+.resume-preview .resume-section h2{color:var(--resume-accent-color,#2563eb);border-bottom:1px solid #dbe2ea;padding-bottom:5px;font-size:13px;letter-spacing:.07em}
+.resume-preview .resume-section{margin-bottom:17px;break-inside:avoid}
+.resume-preview.layout-classic-clean{--resume-accent-color:#334155;font-family:Arial,Helvetica,sans-serif!important}
+.resume-preview.layout-classic-clean .resume-header{text-align:center}
+.resume-preview.layout-classic-clean .contact-info{justify-content:center}
+.resume-preview.layout-classic-clean .resume-section h2{text-transform:uppercase;color:#334155;border-bottom:1px solid #94a3b8}
+.resume-preview.layout-executive{--resume-accent-color:#0f172a;font-family:Georgia,'Times New Roman',serif!important}
+.resume-preview.layout-executive .resume-header h1{font-family:Georgia,serif;font-size:32px}
+.resume-preview.layout-executive .resume-section h2{color:#0f172a;border-bottom:2px solid #0f172a}
+.resume-preview.layout-compact-clean{--resume-accent-color:#475569;padding:.42in!important;font-size:13px!important;line-height:1.3!important}
+.resume-preview.layout-compact-clean .resume-header{margin-bottom:12px;padding-bottom:10px}
+.resume-preview.layout-compact-clean .resume-section{margin-bottom:10px}
+.resume-preview.layout-compact-clean .resume-section h2{font-size:12px;margin-bottom:6px}
+.resume-preview.layout-graduate{--resume-accent-color:#0f766e}
+.resume-preview.layout-graduate .resume-header{border-bottom:3px solid #0f766e}
+.resume-preview.layout-graduate .resume-section h2{color:#0f766e}
+.resume-preview.layout-contemporary{--resume-accent-color:#7c3aed}
+.resume-preview.layout-contemporary .resume-header{border-left:5px solid #7c3aed;padding:3px 0 15px 16px}
+.resume-preview.layout-contemporary .resume-section h2{color:#6d28d9}
+.resume-preview.layout-modern{--resume-accent-color:#2563eb}
+@media(max-width:760px){.resume-template-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.resume-preview-heading{align-items:flex-start;flex-direction:column}.resume-preview-toolbar{align-items:flex-start;flex-direction:column}}
+@media(max-width:440px){.resume-template-grid{grid-template-columns:1fr 1fr;gap:9px}.resume-template-card{padding:8px}.resume-template-card.is-selected{padding:7px}.template-card-detail{font-size:10px}}
+
+
+/* FlowCV Simple collection-inspired layouts (independent implementations) */
+.resume-preview.layout-classic{--resume-accent-color:#222!important;font-family:Arial,Helvetica,sans-serif!important}
+.resume-preview.layout-classic .resume-header{border-bottom:1px solid #333}
+.resume-preview.layout-classic .resume-header h1{font-size:27px}
+.resume-preview.layout-classic .resume-section h2{color:#222;border-bottom:1px solid #777;text-transform:uppercase;letter-spacing:.04em}
+.resume-preview.layout-clear{--resume-accent-color:#475569!important;font-family:Arial,Helvetica,sans-serif!important;padding:.66in!important}
+.resume-preview.layout-clear .resume-header{border:0;padding-bottom:12px;margin-bottom:17px}
+.resume-preview.layout-clear .resume-section h2{color:#334155;border:0;border-bottom:1px solid #e2e8f0;letter-spacing:.025em}
+.resume-preview.layout-true-blue{--resume-accent-color:#2563eb!important;font-family:Arial,Helvetica,sans-serif!important}
+.resume-preview.layout-true-blue .resume-header{border-bottom:2px solid #2563eb}
+.resume-preview.layout-true-blue .resume-header h1,.resume-preview.layout-true-blue .resume-section h2{color:#1d4ed8}
+.resume-preview.layout-true-blue .resume-section h2{border-bottom:1px solid #bfdbfe}
+.resume-preview.layout-editorial{--resume-accent-color:#475569!important;font-family:Georgia,'Times New Roman',serif!important}
+.resume-preview.layout-editorial .resume-header{border:0;text-align:left;padding-bottom:12px}
+.resume-preview.layout-editorial .resume-header h1{font-family:Georgia,serif;font-size:31px;font-weight:600}
+.resume-preview.layout-editorial .contact-info{font-family:Arial,Helvetica,sans-serif}
+.resume-preview.layout-editorial .resume-section h2{font-family:Arial,Helvetica,sans-serif;color:#334155;border-bottom:1px solid #94a3b8;letter-spacing:.09em}
+.resume-preview.layout-rule{--resume-accent-color:#1f2937!important}
+.resume-preview.layout-rule .resume-header{border-bottom:2px solid #1f2937;padding-bottom:16px}
+.resume-preview.layout-rule .resume-section h2{color:#1f2937;border-bottom:2px solid #1f2937;padding-bottom:6px}
+.resume-preview.layout-steady-form{--resume-accent-color:#334155!important;font-family:Arial,Helvetica,sans-serif!important}
+.resume-preview.layout-steady-form .resume-header{border-bottom:1px solid #cbd5e1;padding-bottom:16px}
+.resume-preview.layout-steady-form .resume-section h2{color:#334155;border-bottom:1px solid #cbd5e1;text-transform:none;letter-spacing:0}
+.resume-preview.layout-precision-line{--resume-accent-color:#1e4060!important;padding:.48in!important}
+.resume-preview.layout-precision-line .resume-header{border-bottom:1px solid #94a3b8;padding-bottom:12px;margin-bottom:15px}
+.resume-preview.layout-precision-line .resume-section{margin-bottom:12px}
+.resume-preview.layout-precision-line .resume-section h2{color:#1e4060;border-bottom:1px solid #cbd5e1;font-size:12px;letter-spacing:.08em}
+.resume-preview.layout-classic-serif{--resume-accent-color:#2d2d2d!important;font-family:Georgia,'Times New Roman',serif!important}
+.resume-preview.layout-classic-serif .resume-header{text-align:center;border-bottom:1px solid #777;padding-bottom:15px}
+.resume-preview.layout-classic-serif .resume-header h1{font-family:Georgia,serif;font-size:30px;font-weight:600}
+.resume-preview.layout-classic-serif .contact-info{justify-content:center;font-family:Arial,Helvetica,sans-serif;font-size:10px}
+.resume-preview.layout-classic-serif .resume-section h2{font-family:Georgia,serif;color:#222;border-bottom:1px solid #777;letter-spacing:.02em;text-transform:none}
+.resume-preview.layout-classic .resume-section,.resume-preview.layout-clear .resume-section,.resume-preview.layout-true-blue .resume-section,.resume-preview.layout-editorial .resume-section,.resume-preview.layout-rule .resume-section,.resume-preview.layout-steady-form .resume-section,.resume-preview.layout-precision-line .resume-section,.resume-preview.layout-classic-serif .resume-section{break-inside:avoid}
