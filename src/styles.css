@@ -5614,3 +5614,73 @@ p {
     justify-content: center;
   }
 }
+
+
+/* Reference PDF style: restrained, single-column, serif ATS resume */
+.theme-reference {
+  --resume-font-family: Georgia, 'Times New Roman', serif !important;
+  --resume-font-size: 13px !important;
+  --resume-line-height: 1.28 !important;
+  --resume-heading-size: 16px !important;
+  --resume-accent-color: #111111 !important;
+  background: #ffffff !important;
+  color: #171717 !important;
+  padding: 34px 42px !important;
+  border: 0 !important;
+  box-shadow: 0 2px 14px rgba(0,0,0,.08) !important;
+}
+.theme-reference .resume-header {
+  text-align: center !important;
+  border: 0 !important;
+  border-bottom: 0 !important;
+  padding: 0 0 12px !important;
+  margin-bottom: 18px !important;
+}
+.theme-reference .resume-header h1 {
+  font-family: Georgia, 'Times New Roman', serif !important;
+  font-size: 25px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0 !important;
+  margin: 0 0 3px !important;
+  color: #111 !important;
+}
+.theme-reference .contact-info {
+  justify-content: center !important;
+  gap: 5px 12px !important;
+  font-family: Georgia, 'Times New Roman', serif !important;
+  font-size: 11px !important;
+  color: #333 !important;
+}
+.theme-reference .contact-info span,
+.theme-reference .contact-info a { color: #333 !important; }
+.theme-reference .resume-content { gap: 13px !important; }
+.theme-reference .resume-section { margin: 0 !important; break-inside: avoid; }
+.theme-reference .resume-section h2 {
+  font-family: Georgia, 'Times New Roman', serif !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0 !important;
+  text-transform: uppercase !important;
+  color: #111 !important;
+  border: 0 !important;
+  border-bottom: 1px solid #777 !important;
+  padding: 0 0 3px !important;
+  margin: 0 0 7px !important;
+}
+.theme-reference .resume-section p,
+.theme-reference .resume-section li,
+.theme-reference .resume-section div {
+  font-family: Georgia, 'Times New Roman', serif !important;
+  color: #222 !important;
+  font-size: 12px !important;
+  line-height: 1.28 !important;
+}
+.theme-reference .resume-section ul { padding-left: 18px !important; margin: 3px 0 6px !important; }
+.theme-reference .resume-section li { margin: 0 0 3px !important; }
+.theme-reference .resume-section strong { font-weight: 700 !important; color: #111 !important; }
+.theme-reference .resume-section a { color: #222 !important; text-decoration: none !important; }
+.theme-reference .resume-body { display: block !important; }
+@media (max-width: 640px) {
+  .theme-reference { padding: 22px 18px !important; }
+  .theme-reference .resume-header h1 { font-size: 21px !important; }
+}
