@@ -5922,3 +5922,38 @@ p {
 .resume-preview.layout-modern{--resume-accent-color:#2563eb}
 @media(max-width:760px){.resume-template-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.resume-preview-heading{align-items:flex-start;flex-direction:column}.resume-preview-toolbar{align-items:flex-start;flex-direction:column}}
 @media(max-width:440px){.resume-template-grid{grid-template-columns:1fr 1fr;gap:9px}.resume-template-card{padding:8px}.resume-template-card.is-selected{padding:7px}.template-card-detail{font-size:10px}}
+
+
+/* FlowCV Simple collection-inspired layouts (independent implementations) */
+.resume-preview.layout-classic{--resume-accent-color:#222!important;font-family:Arial,Helvetica,sans-serif!important}
+.resume-preview.layout-classic .resume-header{border-bottom:1px solid #333}
+.resume-preview.layout-classic .resume-header h1{font-size:27px}
+.resume-preview.layout-classic .resume-section h2{color:#222;border-bottom:1px solid #777;text-transform:uppercase;letter-spacing:.04em}
+.resume-preview.layout-clear{--resume-accent-color:#475569!important;font-family:Arial,Helvetica,sans-serif!important;padding:.66in!important}
+.resume-preview.layout-clear .resume-header{border:0;padding-bottom:12px;margin-bottom:17px}
+.resume-preview.layout-clear .resume-section h2{color:#334155;border:0;border-bottom:1px solid #e2e8f0;letter-spacing:.025em}
+.resume-preview.layout-true-blue{--resume-accent-color:#2563eb!important;font-family:Arial,Helvetica,sans-serif!important}
+.resume-preview.layout-true-blue .resume-header{border-bottom:2px solid #2563eb}
+.resume-preview.layout-true-blue .resume-header h1,.resume-preview.layout-true-blue .resume-section h2{color:#1d4ed8}
+.resume-preview.layout-true-blue .resume-section h2{border-bottom:1px solid #bfdbfe}
+.resume-preview.layout-editorial{--resume-accent-color:#475569!important;font-family:Georgia,'Times New Roman',serif!important}
+.resume-preview.layout-editorial .resume-header{border:0;text-align:left;padding-bottom:12px}
+.resume-preview.layout-editorial .resume-header h1{font-family:Georgia,serif;font-size:31px;font-weight:600}
+.resume-preview.layout-editorial .contact-info{font-family:Arial,Helvetica,sans-serif}
+.resume-preview.layout-editorial .resume-section h2{font-family:Arial,Helvetica,sans-serif;color:#334155;border-bottom:1px solid #94a3b8;letter-spacing:.09em}
+.resume-preview.layout-rule{--resume-accent-color:#1f2937!important}
+.resume-preview.layout-rule .resume-header{border-bottom:2px solid #1f2937;padding-bottom:16px}
+.resume-preview.layout-rule .resume-section h2{color:#1f2937;border-bottom:2px solid #1f2937;padding-bottom:6px}
+.resume-preview.layout-steady-form{--resume-accent-color:#334155!important;font-family:Arial,Helvetica,sans-serif!important}
+.resume-preview.layout-steady-form .resume-header{border-bottom:1px solid #cbd5e1;padding-bottom:16px}
+.resume-preview.layout-steady-form .resume-section h2{color:#334155;border-bottom:1px solid #cbd5e1;text-transform:none;letter-spacing:0}
+.resume-preview.layout-precision-line{--resume-accent-color:#1e4060!important;padding:.48in!important}
+.resume-preview.layout-precision-line .resume-header{border-bottom:1px solid #94a3b8;padding-bottom:12px;margin-bottom:15px}
+.resume-preview.layout-precision-line .resume-section{margin-bottom:12px}
+.resume-preview.layout-precision-line .resume-section h2{color:#1e4060;border-bottom:1px solid #cbd5e1;font-size:12px;letter-spacing:.08em}
+.resume-preview.layout-classic-serif{--resume-accent-color:#2d2d2d!important;font-family:Georgia,'Times New Roman',serif!important}
+.resume-preview.layout-classic-serif .resume-header{text-align:center;border-bottom:1px solid #777;padding-bottom:15px}
+.resume-preview.layout-classic-serif .resume-header h1{font-family:Georgia,serif;font-size:30px;font-weight:600}
+.resume-preview.layout-classic-serif .contact-info{justify-content:center;font-family:Arial,Helvetica,sans-serif;font-size:10px}
+.resume-preview.layout-classic-serif .resume-section h2{font-family:Georgia,serif;color:#222;border-bottom:1px solid #777;letter-spacing:.02em;text-transform:none}
+.resume-preview.layout-classic .resume-section,.resume-preview.layout-clear .resume-section,.resume-preview.layout-true-blue .resume-section,.resume-preview.layout-editorial .resume-section,.resume-preview.layout-rule .resume-section,.resume-preview.layout-steady-form .resume-section,.resume-preview.layout-precision-line .resume-section,.resume-preview.layout-classic-serif .resume-section{break-inside:avoid}
