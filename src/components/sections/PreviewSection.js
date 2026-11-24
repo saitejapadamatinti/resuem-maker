@@ -103,16 +103,13 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
       const pdf = new jsPDF('p', 'pt', 'a4');
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
-      const margin = 50;
+      const margin = theme === 'reference' ? 43 : 50;
       let yPosition = margin;
       
       // Color scheme matching the visual design
-      const colors = {
-        primary: [79, 70, 229], // #4f46e5 - matches accentColor
-        text: [31, 41, 55], // #1f2937 - dark gray
-        secondary: [107, 114, 128], // #6b7280 - medium gray
-        light: [243, 244, 246] // #f3f4f6 - light gray
-      };
+      const colors = theme === 'reference'
+        ? { primary: [45, 45, 45], text: [20, 20, 20], secondary: [55, 55, 55], light: [245, 245, 245] }
+        : { primary: [79, 70, 229], text: [31, 41, 55], secondary: [107, 114, 128], light: [243, 244, 246] };
       
       // Generate styled content
       await generateStyledContent(pdf, resumeData, colors, margin, pageWidth, pageHeight);
@@ -132,6 +129,7 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
   
   // Generate professionally styled PDF content
   const generateStyledContent = async (pdf, data, colors, margin, pageWidth, pageHeight) => {
+    const referenceStyle = theme === 'reference';
     let yPos = margin;
     const lineHeight = 16;
     const sectionSpacing = 25;
@@ -149,18 +147,20 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
     // Helper function to draw section divider
     const drawSectionDivider = (y, color = colors.primary) => {
       pdf.setDrawColor(...color);
-      pdf.setLineWidth(1.5);
+      pdf.setLineWidth(referenceStyle ? 0.65 : 1.5);
       pdf.line(margin, y, pageWidth - margin, y);
     };
     
-    // 1. CONTACT HEADER (Styled like the visual resume)
+    // Reference style uses a compact centered serif masthead.
+    pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'normal');
+    // 1. CONTACT HEADER
     if (data.contact) {
       checkPageOverflow(80);
       
       // Name - Large and prominent
       if (data.contact.fullName) {
-        pdf.setFont('helvetica', 'bold');
-        pdf.setFontSize(24);
+        pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'bold');
+        pdf.setFontSize(referenceStyle ? 22 : 24);
         pdf.setTextColor(...colors.text);
         
         const nameWidth = pdf.getStringUnitWidth(data.contact.fullName) * 24 / pdf.internal.scaleFactor;
@@ -168,11 +168,18 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
         pdf.text(data.contact.fullName, nameX, yPos);
         yPos += 35;
         
-        // Add accent line under name
-        drawSectionDivider(yPos - 10, colors.primary);
-        yPos += 15;
+        if (!referenceStyle) drawSectionDivider(yPos - 10, colors.primary);
+        yPos += referenceStyle ? 2 : 15;
       }
       
+      if (referenceStyle && data.contact.headline) {
+        pdf.setFont('times', 'bold');
+        pdf.setFontSize(11);
+        const roleLines = pdf.splitTextToSize(data.contact.headline.toUpperCase(), pageWidth - 2 * margin);
+        pdf.text(roleLines, pageWidth / 2, yPos, { align: 'center' });
+        yPos += roleLines.length * 14 + 3;
+      }
+
       // Contact details in a professional layout
       const contactDetails = [];
       if (data.contact.email) contactDetails.push({ icon: '✉', text: data.contact.email });
@@ -182,12 +189,12 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
       if (data.contact.website) contactDetails.push({ icon: '↗', text: data.contact.website });
       
       if (contactDetails.length > 0) {
-        pdf.setFont('helvetica', 'normal');
-        pdf.setFontSize(11);
+        pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'normal');
+        pdf.setFontSize(referenceStyle ? 9.5 : 11);
         pdf.setTextColor(...colors.secondary);
         
         // Arrange contact details in two columns if more than 2 items
-        const itemsPerRow = contactDetails.length > 2 ? 2 : contactDetails.length;
+        const itemsPerRow = referenceStyle ? 1 : (contactDetails.length > 2 ? 2 : contactDetails.length);
         const colWidth = (pageWidth - 2 * margin) / itemsPerRow;
         
         contactDetails.forEach((detail, index) => {
@@ -196,37 +203,55 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
           const x = margin + (col * colWidth);
           const y = yPos + (row * lineHeight);
           
-          pdf.text(`${detail.icon} ${detail.text}`, x, y);
+          const detailText = referenceStyle ? detail.text : `${detail.icon} ${detail.text}`;
+          pdf.text(detailText, referenceStyle ? pageWidth / 2 : x, y, referenceStyle ? { align: 'center' } : {});
         });
         
-        yPos += Math.ceil(contactDetails.length / itemsPerRow) * lineHeight + sectionSpacing;
+        yPos += Math.ceil(contactDetails.length / itemsPerRow) * (referenceStyle ? 12 : lineHeight) + (referenceStyle ? 14 : sectionSpacing);
       }
     }
     
-    // 2. PROFESSIONAL SUMMARY
+    // 2. RESUME HEADLINE (reference PDF section)
+    if (referenceStyle && data.contact?.headline) {
+      checkPageOverflow(45);
+      pdf.setFont('times', 'bold');
+      pdf.setFontSize(12);
+      pdf.setTextColor(...colors.text);
+      pdf.text('RESUME HEADLINE', margin, yPos);
+      yPos += 14;
+      drawSectionDivider(yPos, colors.primary);
+      yPos += 10;
+      pdf.setFont('times', 'normal');
+      pdf.setFontSize(10.5);
+      const headlineLines = pdf.splitTextToSize(data.contact.headline, pageWidth - 2 * margin);
+      pdf.text(headlineLines, margin, yPos);
+      yPos += headlineLines.length * 13 + 14;
+    }
+
+    // 3. PROFESSIONAL SUMMARY
     if (data.summary && data.summary.trim()) {
       checkPageOverflow(60);
       
       const summaryText = data.summary.replace(/<[^>]*>/g, '').trim();
       if (summaryText) {
         // Section title
-        pdf.setFont('helvetica', 'bold');
-        pdf.setFontSize(14);
+        pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'bold');
+        pdf.setFontSize(referenceStyle ? 12 : 14);
         pdf.setTextColor(...colors.primary);
         pdf.text('PROFESSIONAL SUMMARY', margin, yPos);
         yPos += 20;
         
-        drawSectionDivider(yPos - 10);
-        yPos += 10;
+        drawSectionDivider(yPos - 8);
+        yPos += referenceStyle ? 7 : 10;
         
         // Summary content
-        pdf.setFont('helvetica', 'normal');
-        pdf.setFontSize(11);
+        pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'normal');
+        pdf.setFontSize(referenceStyle ? 10.5 : 11);
         pdf.setTextColor(...colors.text);
         
         const textLines = pdf.splitTextToSize(summaryText, pageWidth - 2 * margin);
         pdf.text(textLines, margin, yPos);
-        yPos += textLines.length * lineHeight + sectionSpacing;
+        yPos += textLines.length * (referenceStyle ? 13 : lineHeight) + (referenceStyle ? 14 : sectionSpacing);
       }
     }
     
