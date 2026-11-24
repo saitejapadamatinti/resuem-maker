@@ -17,15 +17,12 @@ const STORAGE_KEY = 'ats-resume-builder:data:v1';
 const STORAGE_STEPS_KEY = 'ats-resume-builder:steps:v1';
 const STORAGE_STEP_INDEX_KEY = 'ats-resume-builder:currentStep:v1';
 
-const TRACKING_ID = "G-G1SHXCNPED"; // Replace with your Measurement ID
-ReactGA.initialize(TRACKING_ID);
+const TRACKING_ID = process.env.REACT_APP_GA_MEASUREMENT_ID;
+if (TRACKING_ID) ReactGA.initialize(TRACKING_ID);
 function App() {
   const [currentStep, setCurrentStep] = useState(0);
   const [steps, setSteps] = useState(['usage-guide', 'contact', 'websites', 'summary', 'experience', 'education', 'projects', 'skills', 'ats-guide', 'preview']);
   
-  // Debug logging
-  console.log('Current steps:', steps);
-  console.log('Current step index:', currentStep);
   const [resumeData, setResumeData] = useState({
     contact: {},
     websites: [],
@@ -46,11 +43,6 @@ function App() {
   });
   const [theme, setTheme] = useState('classic');
 
-    useEffect(() => {
-  }, [theme]);
-  
-
-  // Debug theme changes
 
 
   // Load from localStorage on mount
@@ -80,12 +72,12 @@ function App() {
       const rawIndex = localStorage.getItem(STORAGE_STEP_INDEX_KEY);
       if (rawIndex !== null) {
         const idx = Number(rawIndex);
-        setCurrentStep(Number.isNaN(idx) ? 0 : Math.max(0, idx));
+        setCurrentStep(Number.isNaN(idx) ? 0 : Math.min(Math.max(0, idx), 9));
       }
     } catch {}
   }, []);
 
-  // Autosave on changes (debounced by microtask via setTimeout)
+  // Debounced local autosave
   useEffect(() => {
     const t = setTimeout(() => {
       try {
@@ -94,7 +86,7 @@ function App() {
         localStorage.setItem(STORAGE_STEP_INDEX_KEY, String(currentStep));
         localStorage.setItem('ats-resume-builder:theme', theme);
       } catch {}
-    }, 0);
+    }, 350);
     return () => clearTimeout(t);
   }, [resumeData, steps, currentStep, theme]);
 
