@@ -212,7 +212,7 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
     }
     
     // 2. RESUME HEADLINE (reference PDF section)
-    if (referenceStyle && data.contact?.headline) {
+    if (referenceStyle && data.contact?.resumeHeadline?.trim()) {
       checkPageOverflow(45);
       pdf.setFont('times', 'bold');
       pdf.setFontSize(12);
@@ -223,7 +223,7 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
       yPos += 10;
       pdf.setFont('times', 'normal');
       pdf.setFontSize(10.5);
-      const headlineLines = pdf.splitTextToSize(data.contact.headline, pageWidth - 2 * margin);
+      const headlineLines = pdf.splitTextToSize(data.contact.resumeHeadline.trim(), pageWidth - 2 * margin);
       pdf.text(headlineLines, margin, yPos);
       yPos += headlineLines.length * 13 + 14;
     }
@@ -531,6 +531,11 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
       }
     }
     
+    // Resume Headline
+    if (data.contact?.resumeHeadline?.trim()) {
+      sections.push({ title: 'Resume Headline', content: [{ type: 'text', text: data.contact.resumeHeadline.trim() }] });
+    }
+
     // Professional Summary
     if (data.summary && data.summary.trim()) {
       const summaryText = data.summary.replace(/<[^>]*>/g, '').trim();
