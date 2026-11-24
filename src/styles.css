@@ -5694,3 +5694,145 @@ p {
   margin: 0 0 5px;
   color: #111;
 }
+
+
+/* One consistent professional resume system across all exported previews */
+.professional-theme-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface, #fff);
+  color: var(--color-text, #202020);
+  font-size: 13px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+.professional-theme-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 8px;
+  border-radius: 50%;
+  background: #315b78;
+}
+.resume-preview.theme-classic,
+.resume-preview.theme-modern,
+.resume-preview.theme-elegant,
+.resume-preview.theme-compact,
+.resume-preview.theme-professional,
+.resume-preview.theme-reference,
+.resume-preview.theme-twocol {
+  font-family: Arial, Helvetica, sans-serif !important;
+  color: #202a35 !important;
+  background: #fff !important;
+}
+.resume-preview.theme-classic .resume-header,
+.resume-preview.theme-modern .resume-header,
+.resume-preview.theme-elegant .resume-header,
+.resume-preview.theme-compact .resume-header,
+.resume-preview.theme-professional .resume-header,
+.resume-preview.theme-reference .resume-header,
+.resume-preview.theme-twocol .resume-header {
+  text-align: left !important;
+  border: 0 !important;
+  border-bottom: 2px solid #315b78 !important;
+  padding: 0 0 13px !important;
+  margin-bottom: 18px !important;
+}
+.resume-preview.theme-classic .resume-header h1,
+.resume-preview.theme-modern .resume-header h1,
+.resume-preview.theme-elegant .resume-header h1,
+.resume-preview.theme-compact .resume-header h1,
+.resume-preview.theme-professional .resume-header h1,
+.resume-preview.theme-reference .resume-header h1,
+.resume-preview.theme-twocol .resume-header h1 {
+  color: #172b3a !important;
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: 25px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0 !important;
+}
+.resume-preview.theme-classic .contact-info,
+.resume-preview.theme-modern .contact-info,
+.resume-preview.theme-elegant .contact-info,
+.resume-preview.theme-compact .contact-info,
+.resume-preview.theme-professional .contact-info,
+.resume-preview.theme-reference .contact-info,
+.resume-preview.theme-twocol .contact-info {
+  justify-content: flex-start !important;
+  color: #455563 !important;
+  font-size: 10.5px !important;
+  gap: 5px 12px !important;
+}
+.resume-preview.theme-classic .resume-section h2,
+.resume-preview.theme-modern .resume-section h2,
+.resume-preview.theme-elegant .resume-section h2,
+.resume-preview.theme-compact .resume-section h2,
+.resume-preview.theme-professional .resume-section h2,
+.resume-preview.theme-reference .resume-section h2,
+.resume-preview.theme-twocol .resume-section h2 {
+  color: #24465f !important;
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: 13px !important;
+  font-style: normal !important;
+  font-weight: 700 !important;
+  letter-spacing: .045em !important;
+  text-transform: uppercase !important;
+  border: 0 !important;
+  border-bottom: 1px solid #9eacb7 !important;
+  border-left: 0 !important;
+  padding: 0 0 5px !important;
+  margin: 0 0 8px !important;
+}
+.resume-preview.theme-classic .resume-section p,
+.resume-preview.theme-modern .resume-section p,
+.resume-preview.theme-elegant .resume-section p,
+.resume-preview.theme-compact .resume-section p,
+.resume-preview.theme-professional .resume-section p,
+.resume-preview.theme-reference .resume-section p,
+.resume-preview.theme-twocol .resume-section p,
+.resume-preview.theme-classic .resume-section li,
+.resume-preview.theme-modern .resume-section li,
+.resume-preview.theme-elegant .resume-section li,
+.resume-preview.theme-compact .resume-section li,
+.resume-preview.theme-professional .resume-section li,
+.resume-preview.theme-reference .resume-section li,
+.resume-preview.theme-twocol .resume-section li {
+  color: #273440 !important;
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: 11px !important;
+  line-height: 1.42 !important;
+}
+.resume-preview.theme-classic .resume-section,
+.resume-preview.theme-modern .resume-section,
+.resume-preview.theme-elegant .resume-section,
+.resume-preview.theme-compact .resume-section,
+.resume-preview.theme-professional .resume-section,
+.resume-preview.theme-reference .resume-section,
+.resume-preview.theme-twocol .resume-section {
+  margin-bottom: 13px !important;
+  break-inside: avoid;
+}
+.resume-preview.theme-classic .resume-body,
+.resume-preview.theme-modern .resume-body,
+.resume-preview.theme-elegant .resume-body,
+.resume-preview.theme-compact .resume-body,
+.resume-preview.theme-professional .resume-body,
+.resume-preview.theme-reference .resume-body,
+.resume-preview.theme-twocol .resume-body {
+  display: block !important;
+}
+.resume-preview.theme-classic .resume-content,
+.resume-preview.theme-modern .resume-content,
+.resume-preview.theme-elegant .resume-content,
+.resume-preview.theme-compact .resume-content,
+.resume-preview.theme-professional .resume-content,
+.resume-preview.theme-reference .resume-content,
+.resume-preview.theme-twocol .resume-content {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 13px !important;
+}
