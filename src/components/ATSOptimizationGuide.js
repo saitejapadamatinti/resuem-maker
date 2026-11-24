@@ -49,7 +49,7 @@ function ATSOptimizationGuide({ resumeData = {}, targetJobDescription = '', onUp
   const visibleMissing = showAll ? analysis.missing : analysis.missing.slice(0, 24);
 
   const generateCoverLetter = () => {
-    const plainSummary = (resumeData.summary || '').replace(/<[^>]*>/g, ' ').replace(/\\s+/g, ' ').trim();
+    const plainSummary = (resumeData.summary || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
     const role = resumeData.coverLetterRole || resumeData.contact?.headline || 'the advertised position';
     const company = resumeData.coverLetterCompany || 'your organization';
     const experience = (resumeData.experience || []).find(item => item.title || item.company);
@@ -67,7 +67,7 @@ function ATSOptimizationGuide({ resumeData = {}, targetJobDescription = '', onUp
     }
     if (skills.length) paragraphs.push('', `My relevant skills include ${skills.join(', ')}.`);
     paragraphs.push('', 'I would appreciate the opportunity to discuss how my background aligns with your needs. Thank you for your time and consideration.', '', `Sincerely,\n${resumeData.contact?.fullName || '[Your name]'}`);
-    onUpdateResumeField('coverLetterDraft', paragraphs.join('\\n'));
+    onUpdateResumeField('coverLetterDraft', paragraphs.join('\n'));
   };
 
   const copyCoverLetter = async () => {
