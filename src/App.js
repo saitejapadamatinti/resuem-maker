@@ -372,12 +372,12 @@ function App() {
       }
 
       // Image-only and low-text PDFs need OCR. This path is automatic.
-      if (!text || text.replace(/\\s/g, '').length < 120) {
+      if (!text || text.replace(/\s/g, '').length < 120) {
         const ocrText = await extractTextWithOcr(arrayBuffer);
         if (ocrText && ocrText.length > text.length) text = ocrText;
       }
 
-      if (!text || text.replace(/\\s/g, '').length < 30) {
+      if (!text || text.replace(/\s/g, '').length < 30) {
         alert('No readable text was found, even after OCR. The PDF may be password-protected, damaged, or too low-resolution. Try opening it and choosing Print → Save as PDF, then import the new file.');
         return;
       }
