@@ -5836,3 +5836,28 @@ p {
   flex-direction: column !important;
   gap: 13px !important;
 }
+
+
+.header-theme-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 190px;
+}
+.header-theme-picker .form-control {
+  min-width: 190px;
+  max-width: 240px;
+  padding: 8px 30px 8px 10px;
+  font-size: 13px;
+}
+.theme-reference .resume-header { text-align: center; }
+.theme-reference .resume-header .reference-headline {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  letter-spacing: .04em;
+  margin: 3px 0 5px;
+}
+@media (max-width: 640px) {
+  .header-theme-picker { min-width: 0; width: 100%; }
+  .header-theme-picker .form-control { width: 100%; max-width: none; }
+}
