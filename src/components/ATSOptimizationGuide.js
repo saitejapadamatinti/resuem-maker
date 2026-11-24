@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 const STOP_WORDS = new Set(['the','and','for','with','you','your','our','are','this','that','will','from','have','has','who','what','their','they','them','into','our','about','years','year','work','role','team','ability','strong','good','excellent','experience','looking','required','preferred','using','use','skills','skill']);
 
@@ -7,15 +7,16 @@ function tokenize(value = '') {
     .filter(word => !STOP_WORDS.has(word));
 }
 
-function ATSOptimizationGuide({ resumeData = {}, onNavigateToSection = () => {} }) {
-  const [jobDescription, setJobDescription] = useState('');
+function ATSOptimizationGuide({ resumeData = {}, targetJobDescription = '', onUpdateJobDescription = () => {}, onNavigateToSection = () => {} }) {
+  const [jobDescription, setJobDescription] = useState(targetJobDescription);
+  useEffect(() => setJobDescription(targetJobDescription || ''), [targetJobDescription]);
   const [activeTab, setActiveTab] = useState('match');
   const [showAll, setShowAll] = useState(false);
 
   const resumeText = useMemo(() => {
     const parts = [
       resumeData.contact?.fullName, resumeData.contact?.email, resumeData.contact?.phone,
-      resumeData.contact?.location, resumeData.summary,
+      resumeData.contact?.location, resumeData.contact?.headline, resumeData.contact?.website, resumeData.summary,
       ...(resumeData.experience || []).flatMap(item => [item.title, item.company, item.location, ...(item.achievements || [])]),
       ...(resumeData.education || []).flatMap(item => [item.degree, item.school, item.location]),
       ...(resumeData.projects || []).flatMap(item => [item.name, item.role, item.description]),
@@ -68,7 +69,7 @@ function ATSOptimizationGuide({ resumeData = {}, onNavigateToSection = () => {} 
       {activeTab === 'match' && (
         <div className="ats-guide-content">
           <label className="form-label" htmlFor="job-description-match">Paste the target job description</label>
-          <textarea id="job-description-match" className="form-control job-description-input" rows="9" value={jobDescription} onChange={event => setJobDescription(event.target.value)} placeholder="Paste the complete job description here. Include responsibilities, qualifications and required technologies." />
+          <textarea id="job-description-match" className="form-control job-description-input" rows="9" value={jobDescription} onChange={event => { setJobDescription(event.target.value); onUpdateJobDescription(event.target.value); }} placeholder="Paste the complete job description here. Include responsibilities, qualifications and required technologies." />
           {jobDescription.trim() ? (
             <div className="job-match-results">
               <div className="job-match-score"><strong>{analysis.score}%</strong><span>Keyword overlap</span></div>
