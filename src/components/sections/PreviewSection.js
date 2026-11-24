@@ -1188,6 +1188,7 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
       >
         <div className="resume-header">
           <h1>{resumeData.contact.fullName || 'Your Name'}</h1>
+          {theme === 'reference' && resumeData.contact.headline && <div className="reference-headline">{resumeData.contact.headline}</div>}
           <div className="contact-info">
             {resumeData.contact.phone && <span>{resumeData.contact.phone}</span>}
             {resumeData.contact.email && (
