@@ -260,7 +260,7 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
       checkPageOverflow(80);
       
       // Section title
-      pdf.setFont('helvetica', 'bold');
+      pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'bold');
       pdf.setFontSize(14);
       pdf.setTextColor(...colors.primary);
       pdf.text('WORK EXPERIENCE', margin, yPos);
@@ -274,14 +274,14 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
           checkPageOverflow(100);
           
           // Job title - prominent and bold
-          pdf.setFont('helvetica', 'bold');
+          pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'bold');
           pdf.setFontSize(12);
           pdf.setTextColor(...colors.text);
           pdf.text(exp.title, margin, yPos);
           yPos += 18;
           
           // Company and dates on same line
-          pdf.setFont('helvetica', 'normal');
+          pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'normal');
           pdf.setFontSize(11);
           pdf.setTextColor(...colors.secondary);
           
@@ -297,7 +297,7 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
           
           // Achievements with proper bullet formatting
           if (exp.achievements && exp.achievements.length > 0) {
-            pdf.setFont('helvetica', 'normal');
+            pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'normal');
             pdf.setFontSize(10);
             pdf.setTextColor(...colors.text);
             
@@ -326,7 +326,7 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
       checkPageOverflow(60);
       
       // Section title
-      pdf.setFont('helvetica', 'bold');
+      pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'bold');
       pdf.setFontSize(14);
       pdf.setTextColor(...colors.primary);
       pdf.text('EDUCATION', margin, yPos);
@@ -340,14 +340,14 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
           checkPageOverflow(50);
           
           // Degree
-          pdf.setFont('helvetica', 'bold');
+          pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'bold');
           pdf.setFontSize(12);
           pdf.setTextColor(...colors.text);
           pdf.text(edu.degree, margin, yPos);
           yPos += 18;
           
           // School and graduation date
-          pdf.setFont('helvetica', 'normal');
+          pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'normal');
           pdf.setFontSize(11);
           pdf.setTextColor(...colors.secondary);
           
@@ -361,7 +361,7 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
           
           // GPA if available
           if (edu.gpa) {
-            pdf.setFont('helvetica', 'normal');
+            pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'normal');
             pdf.setFontSize(10);
             pdf.setTextColor(...colors.text);
             pdf.text(`GPA: ${edu.gpa}`, margin, yPos);
@@ -378,7 +378,7 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
       checkPageOverflow(60);
       
       // Section title
-      pdf.setFont('helvetica', 'bold');
+      pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'bold');
       pdf.setFontSize(14);
       pdf.setTextColor(...colors.primary);
       pdf.text('SKILLS', margin, yPos);
@@ -389,13 +389,13 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
       
       // Technical Skills
       if (data.skills.technical && data.skills.technical.length > 0) {
-        pdf.setFont('helvetica', 'bold');
+        pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'bold');
         pdf.setFontSize(11);
         pdf.setTextColor(...colors.text);
         pdf.text('Technical Skills:', margin, yPos);
         yPos += 16;
         
-        pdf.setFont('helvetica', 'normal');
+        pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'normal');
         pdf.setFontSize(10);
         pdf.setTextColor(...colors.text);
         const techSkillsText = data.skills.technical.join(' • ');
@@ -408,13 +408,13 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
       if (data.skills.soft && data.skills.soft.length > 0) {
         checkPageOverflow(30);
         
-        pdf.setFont('helvetica', 'bold');
+        pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'bold');
         pdf.setFontSize(11);
         pdf.setTextColor(...colors.text);
         pdf.text('Soft Skills:', margin, yPos);
         yPos += 16;
         
-        pdf.setFont('helvetica', 'normal');
+        pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'normal');
         pdf.setFontSize(10);
         pdf.setTextColor(...colors.text);
         const softSkillsText = data.skills.soft.join(' • ');
@@ -427,13 +427,13 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
       if (data.skills.other && data.skills.other.length > 0) {
         checkPageOverflow(30);
         
-        pdf.setFont('helvetica', 'bold');
+        pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'bold');
         pdf.setFontSize(11);
         pdf.setTextColor(...colors.text);
         pdf.text('Other Skills:', margin, yPos);
         yPos += 16;
         
-        pdf.setFont('helvetica', 'normal');
+        pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'normal');
         pdf.setFontSize(10);
         pdf.setTextColor(...colors.text);
         const otherSkillsText = data.skills.other.join(' • ');
@@ -448,7 +448,7 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
       checkPageOverflow(60);
       
       // Section title
-      pdf.setFont('helvetica', 'bold');
+      pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'bold');
       pdf.setFontSize(14);
       pdf.setTextColor(...colors.primary);
       pdf.text('PROJECTS', margin, yPos);
@@ -462,7 +462,7 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
           checkPageOverflow(50);
           
           // Project name
-          pdf.setFont('helvetica', 'bold');
+          pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'bold');
           pdf.setFontSize(12);
           pdf.setTextColor(...colors.text);
           pdf.text(project.name, margin, yPos);
@@ -470,7 +470,7 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
           
           // Project URL if available
           if (project.url) {
-            pdf.setFont('helvetica', 'normal');
+            pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'normal');
             pdf.setFontSize(10);
             pdf.setTextColor(...colors.secondary);
             pdf.text(project.url, margin, yPos);
@@ -481,7 +481,7 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
           if (project.description) {
             const cleanDesc = project.description.replace(/<[^>]*>/g, '').trim();
             if (cleanDesc) {
-              pdf.setFont('helvetica', 'normal');
+              pdf.setFont(referenceStyle ? 'times' : 'helvetica', 'normal');
               pdf.setFontSize(10);
               pdf.setTextColor(...colors.text);
               
