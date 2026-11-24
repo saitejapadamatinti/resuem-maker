@@ -111,6 +111,7 @@ function MainContent({ steps, currentStep, resumeData, onUpdateData, onStepChang
             resumeData={resumeData}
             targetJobDescription={resumeData.targetJobDescription || ''}
             onUpdateJobDescription={(value) => onUpdateData('targetJobDescription', value)}
+            onUpdateResumeField={(field, value) => onUpdateData(field, value)}
             onNavigateToSection={(key) => {
               const index = steps.indexOf(key);
               if (index >= 0) onStepChange(index);
