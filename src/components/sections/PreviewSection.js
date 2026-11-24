@@ -19,8 +19,8 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
   const [dividerStyle, setDividerStyle] = useState('solid');
   const [showGuides, setShowGuides] = useState(true);
   const [atsFriendly, setAtsFriendly] = useState(true);
-  const [selectedTemplate, setSelectedTemplate] = useState(() => { try { return localStorage.getItem('ats-resume-builder:template') || 'modern'; } catch { return 'modern'; } });
-  const templates = [{id:'modern',name:'Modern Minimal',detail:'Clean typography and subtle accents',tag:'Popular'},{id:'classic-clean',name:'Classic Clean',detail:'Traditional recruiter-friendly layout',tag:'ATS friendly'},{id:'executive',name:'Executive',detail:'Confident headings and refined spacing',tag:'Experienced'},{id:'compact-clean',name:'Compact',detail:'Space-efficient for detailed experience',tag:'One page'},{id:'graduate',name:'First Job',detail:'Education and projects take the lead',tag:'Entry level'},{id:'contemporary',name:'Contemporary',detail:'A polished modern professional look',tag:'Modern'}];
+  const templates = [{id:'classic',name:'Classic',detail:'Timeless, straightforward, and highly readable',tag:'Simple'},{id:'clear',name:'Clear',detail:'Open spacing with a crisp section hierarchy',tag:'Minimal'},{id:'true-blue',name:'True Blue',detail:'A restrained blue accent with a clean structure',tag:'Subtle color'},{id:'editorial',name:'Editorial',detail:'Elegant typography and balanced white space',tag:'Refined'},{id:'rule',name:'Rule',detail:'Strong horizontal rules and clear section breaks',tag:'Structured'},{id:'steady-form',name:'Steady Form',detail:'Balanced alignment for professional experience',tag:'Professional'},{id:'precision-line',name:'Precision Line',detail:'Precise dividers and compact information flow',tag:'Focused'},{id:'classic-serif',name:'Classic Serif',detail:'Traditional serif typography and formal styling',tag:'Traditional'}];
+  const [selectedTemplate, setSelectedTemplate] = useState(() => { try { const saved = localStorage.getItem('ats-resume-builder:template'); return templates.some(item => item.id === saved) ? saved : 'classic'; } catch { return 'classic'; } });
   useEffect(() => { try { localStorage.setItem('ats-resume-builder:template', selectedTemplate); } catch {} }, [selectedTemplate]);
 
   // Legacy theme prop retained for backwards compatibility; selectedTemplate controls the layout.
@@ -105,13 +105,13 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
       const pdf = new jsPDF('p', 'pt', 'a4');
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
-      const margin = theme === 'reference' ? 43 : 50;
+      const margin = selectedTemplate === 'precision-line' ? 42 : 50;
       let yPosition = margin;
       
       // Color scheme matching the visual design
-      const colors = theme === 'reference'
-        ? { primary: [45, 45, 45], text: [20, 20, 20], secondary: [55, 55, 55], light: [245, 245, 245] }
-        : { primary: [79, 70, 229], text: [31, 41, 55], secondary: [107, 114, 128], light: [243, 244, 246] };
+      const templatePalettes = { classic: [35,35,35], clear: [55,65,81], 'true-blue': [37,99,235], editorial: [71,85,105], rule: [31,41,55], 'steady-form': [51,65,85], 'precision-line': [30,64,95], 'classic-serif': [45,45,45] };
+      const accent = templatePalettes[selectedTemplate] || templatePalettes.classic;
+      const colors = { primary: accent, text: [31,41,55], secondary: [90,100,112], light: [245,246,248] };
       
       // Generate styled content
       await generateStyledContent(pdf, resumeData, colors, margin, pageWidth, pageHeight);
@@ -131,7 +131,7 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
   
   // Generate professionally styled PDF content
   const generateStyledContent = async (pdf, data, colors, margin, pageWidth, pageHeight) => {
-    const referenceStyle = theme === 'reference';
+    const referenceStyle = selectedTemplate === 'classic-serif';
     let yPos = margin;
     const lineHeight = 16;
     const sectionSpacing = 25;
@@ -166,11 +166,11 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
         pdf.setTextColor(...colors.text);
         
         const nameWidth = pdf.getStringUnitWidth(data.contact.fullName) * 24 / pdf.internal.scaleFactor;
-        const nameX = (pageWidth - nameWidth) / 2; // Center the name
+        const nameX = referenceStyle ? (pageWidth - nameWidth) / 2 : margin;
         pdf.text(data.contact.fullName, nameX, yPos);
         yPos += 35;
         
-        if (!referenceStyle) drawSectionDivider(yPos - 10, colors.primary);
+        if (selectedTemplate === 'rule' || selectedTemplate === 'precision-line') drawSectionDivider(yPos - 10, colors.primary);
         yPos += referenceStyle ? 2 : 15;
       }
       
@@ -205,7 +205,7 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
           const x = margin + (col * colWidth);
           const y = yPos + (row * lineHeight);
           
-          const detailText = referenceStyle ? detail.text : `${detail.icon} ${detail.text}`;
+          const detailText = detail.text;
           pdf.text(detailText, referenceStyle ? pageWidth / 2 : x, y, referenceStyle ? { align: 'center' } : {});
         });
         
@@ -1200,7 +1200,7 @@ function PreviewSection({ steps = [], resumeData, onExportJson, theme = 'classic
           </button>
         ))}
       </div>
-      <div className="resume-preview-toolbar"><strong>{templates.find(item => item.id === selectedTemplate)?.name}</strong><span>A4 page · Editable live preview · ATS-conscious</span></div>
+      <div className="resume-preview-toolbar"><strong>{templates.find(item => item.id === selectedTemplate)?.name}</strong><span>A4 page · Editable live preview · Simple layout</span></div>
       
       <div 
         className={`resume-preview ${atsFriendly ? 'ats-friendly' : ''} layout-${selectedTemplate}`}
