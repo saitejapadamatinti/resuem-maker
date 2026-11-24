@@ -387,7 +387,8 @@ function App() {
         email: (text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i) || [,''])[1] || (text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i) || [])[0] || '',
         phone: (text.match(/(\+?\d[\d\s\-()]{8,}\d)/) || [,''])[1] || '',
         location: (text.match(/\b([A-Za-z]+,\s*[A-Za-z]{2,})\b/) || [,''])[1] || '',
-        linkedIn: (text.match(/https?:\/\/(?:www\.)?linkedin\.com\/[A-Za-z0-9_\-/]+/i) || [,''])[1] || ''
+        linkedIn: (text.match(/https?:\/\/(?:www\.)?linkedin\.com\/[A-Za-z0-9_\-/]+/i) || [,''])[1] || '',
+        resumeHeadline: ((text.match(/RESUME HEADLINE\\s*([\\s\\S]*?)(?=\\n(?:PROFESSIONAL SUMMARY|TECHNICAL SKILLS|PROFESSIONAL EXPERIENCE)\\b)/i) || [,''])[1] || '').replace(/\\s+/g, ' ').trim()
       };
 
       const websites = Array.from(new Set([
