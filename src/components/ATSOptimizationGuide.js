@@ -7,7 +7,7 @@ function tokenize(value = '') {
     .filter(word => !STOP_WORDS.has(word));
 }
 
-function ATSOptimizationGuide({ resumeData = {}, targetJobDescription = '', onUpdateJobDescription = () => {}, onNavigateToSection = () => {} }) {
+function ATSOptimizationGuide({ resumeData = {}, targetJobDescription = '', onUpdateJobDescription = () => {}, onUpdateResumeField = () => {}, onNavigateToSection = () => {} }) {
   const [jobDescription, setJobDescription] = useState(targetJobDescription);
   useEffect(() => setJobDescription(targetJobDescription || ''), [targetJobDescription]);
   const [activeTab, setActiveTab] = useState('match');
@@ -27,8 +27,9 @@ function ATSOptimizationGuide({ resumeData = {}, targetJobDescription = '', onUp
 
   const analysis = useMemo(() => {
     const terms = [...new Set(tokenize(jobDescription))];
-    const matched = terms.filter(term => resumeText.includes(term));
-    const missing = terms.filter(term => !resumeText.includes(term));
+    const resumeTokens = new Set(tokenize(resumeText));
+    const matched = terms.filter(term => resumeTokens.has(term));
+    const missing = terms.filter(term => !resumeTokens.has(term));
     const score = terms.length ? Math.round((matched.length / terms.length) * 100) : 0;
     return { terms, matched, missing, score };
   }, [jobDescription, resumeText]);
@@ -47,6 +48,47 @@ function ATSOptimizationGuide({ resumeData = {}, targetJobDescription = '', onUp
   const readiness = Math.round((complete / checks.length) * 100);
   const visibleMissing = showAll ? analysis.missing : analysis.missing.slice(0, 24);
 
+  const generateCoverLetter = () => {
+    const plainSummary = (resumeData.summary || '').replace(/<[^>]*>/g, ' ').replace(/\\s+/g, ' ').trim();
+    const role = resumeData.coverLetterRole || resumeData.contact?.headline || 'the advertised position';
+    const company = resumeData.coverLetterCompany || 'your organization';
+    const experience = (resumeData.experience || []).find(item => item.title || item.company);
+    const skills = [...(resumeData.skills?.technical || []), ...(resumeData.skills?.other || [])].filter(Boolean).slice(0, 7);
+    const highlights = experience?.achievements?.filter(Boolean).slice(0, 2) || [];
+    const paragraphs = [
+      'Dear Hiring Team,',
+      '',
+      `I am writing to express my interest in the ${role} opportunity at ${company}. I would welcome the opportunity to contribute my experience and continue growing with your team.`
+    ];
+    if (plainSummary) paragraphs.push('', plainSummary);
+    if (experience) {
+      paragraphs.push('', `In my role as ${experience.title || 'a professional'}${experience.company ? ` at ${experience.company}` : ''}, I have developed practical experience relevant to this opportunity.`);
+      highlights.forEach(item => paragraphs.push(`• ${item}`));
+    }
+    if (skills.length) paragraphs.push('', `My relevant skills include ${skills.join(', ')}.`);
+    paragraphs.push('', 'I would appreciate the opportunity to discuss how my background aligns with your needs. Thank you for your time and consideration.', '', `Sincerely,\n${resumeData.contact?.fullName || '[Your name]'}`);
+    onUpdateResumeField('coverLetterDraft', paragraphs.join('\\n'));
+  };
+
+  const copyCoverLetter = async () => {
+    const draft = resumeData.coverLetterDraft || '';
+    if (!draft) return;
+    try { await navigator.clipboard.writeText(draft); alert('Cover letter copied.'); }
+    catch { alert('Clipboard access is unavailable. Select and copy the text manually.'); }
+  };
+
+  const downloadCoverLetter = () => {
+    const draft = resumeData.coverLetterDraft || '';
+    if (!draft) return;
+    const blob = new Blob([draft], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = 'cover-letter.txt';
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <section className="section active ats-optimization-guide">
       <div className="guide-header">
@@ -64,6 +106,7 @@ function ATSOptimizationGuide({ resumeData = {}, targetJobDescription = '', onUp
       <div className="guide-tabs" role="tablist" aria-label="ATS tools">
         <button type="button" className={activeTab === 'match' ? 'tab-button active' : 'tab-button'} onClick={() => setActiveTab('match')}>Job match</button>
         <button type="button" className={activeTab === 'checklist' ? 'tab-button active' : 'tab-button'} onClick={() => setActiveTab('checklist')}>Resume checklist</button>
+        <button type="button" className={activeTab === 'cover-letter' ? 'tab-button active' : 'tab-button'} onClick={() => setActiveTab('cover-letter')}>Cover letter</button>
       </div>
 
       {activeTab === 'match' && (
@@ -80,6 +123,21 @@ function ATSOptimizationGuide({ resumeData = {}, targetJobDescription = '', onUp
               <p className="ats-disclaimer">Add a missing term only when it truthfully reflects your skills or experience. Similar wording may also be recognized by hiring systems.</p>
             </div>
           ) : <div className="empty-state">Add a job description to see keyword overlap and missing terms.</div>}
+        </div>
+      )}
+
+      {activeTab === 'cover-letter' && (
+        <div className="ats-guide-content cover-letter-builder">
+          <h3>Cover Letter Builder</h3>
+          <p className="section-description">Create a first draft using only information already present in your resume. Review every sentence and tailor it to the specific job before sending.</p>
+          <div className="form-grid">
+            <div className="form-group"><label className="form-label" htmlFor="cover-company">Company name</label><input id="cover-company" className="form-control" value={resumeData.coverLetterCompany || ''} onChange={event => onUpdateResumeField('coverLetterCompany', event.target.value)} placeholder="Company name" /></div>
+            <div className="form-group"><label className="form-label" htmlFor="cover-role">Target role</label><input id="cover-role" className="form-control" value={resumeData.coverLetterRole || ''} onChange={event => onUpdateResumeField('coverLetterRole', event.target.value)} placeholder="Frontend Developer" /></div>
+          </div>
+          <div className="cover-letter-actions"><button type="button" className="btn btn--primary" onClick={generateCoverLetter}>Generate first draft</button><button type="button" className="btn btn--outline" onClick={copyCoverLetter} disabled={!resumeData.coverLetterDraft}>Copy</button><button type="button" className="btn btn--outline" onClick={downloadCoverLetter} disabled={!resumeData.coverLetterDraft}>Download .txt</button></div>
+          <label className="form-label" htmlFor="cover-letter-draft">Edit your cover letter</label>
+          <textarea id="cover-letter-draft" className="form-control job-description-input" rows="16" value={resumeData.coverLetterDraft || ''} onChange={event => onUpdateResumeField('coverLetterDraft', event.target.value)} placeholder="Generate a draft, then personalize it here." />
+          <p className="ats-disclaimer">The generated text is a starting point, not an AI-verified application. Confirm all claims, company details and role requirements yourself.</p>
         </div>
       )}
 
