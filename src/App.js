@@ -442,6 +442,8 @@ function App() {
         onChangeTheme={setTheme}
         onImportResume={importResume}
         onImportPdf={importPdf}
+        currentResumeData={resumeData}
+        onLoadResume={(data) => importResume({ resumeData: data })}
         authKey="auto" // Options: 'auto', 'always', 'never', 'guest-only', 'user-only'
       />
       <div className="app-layout">
