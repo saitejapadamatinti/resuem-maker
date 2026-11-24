@@ -168,18 +168,6 @@ function Header({ theme = 'classic', onChangeTheme, onImportResume, onImportPdf,
             onChange={handleFileChange}
             style={{ display: 'none' }}
           />
-          <label className="header-theme-picker">
-            <span className="professional-theme-dot" />
-            <span className="sr-only">Resume style</span>
-            <select className="form-control" aria-label="Resume style" value={theme} onChange={event => onChangeTheme && onChangeTheme(event.target.value)}>
-              <option value="classic">Classic</option>
-              <option value="modern">Modern</option>
-              <option value="elegant">Elegant</option>
-              <option value="compact">Compact</option>
-              <option value="professional">Professional</option>
-              <option value="reference">Classic Resume (Reference PDF)</option>
-            </select>
-          </label>
           <button className="btn btn--outline" onClick={handleImportClick}>Import JSON/PDF</button>
         </div>
       </div>
