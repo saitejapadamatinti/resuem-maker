@@ -168,17 +168,10 @@ function Header({ theme = 'classic', onChangeTheme, onImportResume, onImportPdf,
             onChange={handleFileChange}
             style={{ display: 'none' }}
           />
-          <select className="form-control" value={theme} onChange={(e) => {
-            console.log('Theme changed in Header to:', e.target.value);
-            onChangeTheme && onChangeTheme(e.target.value);
-          }}>
-            <option value="classic">Classic</option>
-            <option value="modern">Modern</option>
-            <option value="elegant">Elegant</option>
-            <option value="compact">Compact</option>
-            <option value="professional">Professional</option>
-            <option value="twocol">Two Column</option>
-          </select>
+          <div className="professional-theme-label" aria-label="Resume design">
+            <span className="professional-theme-dot" />
+            <span>Professional Resume</span>
+          </div>
           <button className="btn btn--outline" onClick={handleImportClick}>Import JSON/PDF</button>
         </div>
       </div>
