@@ -49,7 +49,7 @@ function App() {
       websites: 'Websites & Links'
     }
   });
-  const [theme, setTheme] = useState('classic');
+  const [theme, setTheme] = useState('professional');
 
 
 
@@ -107,8 +107,9 @@ function App() {
 
   useEffect(() => {
     try {
-      const savedTheme = localStorage.getItem('ats-resume-builder:theme');
-      if (savedTheme) setTheme(savedTheme);
+      // Keep every resume on the single professional design, including older saved drafts.
+      localStorage.setItem('ats-resume-builder:theme', 'professional');
+      setTheme('professional');
     } catch {}
   }, []);
 
@@ -474,7 +475,7 @@ function App() {
     <div className="app">
       <Header 
         theme={theme}
-        onChangeTheme={setTheme}
+        onChangeTheme={() => setTheme('professional')}
         onImportResume={importResume}
         onImportPdf={importPdf}
         currentResumeData={resumeData}
